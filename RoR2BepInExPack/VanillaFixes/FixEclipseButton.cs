@@ -17,7 +17,7 @@ internal class FixEclipseButton
         var hookConfig = new HookConfig() { ManualApply = true };
         _hook = new Hook(
                         typeof(DisableIfGameModded).GetMethod(nameof(DisableIfGameModded.OnEnable), ReflectionHelper.AllFlags),
-                        typeof(FixConsoleLog).GetMethod(nameof(FixEclipseButton.FixIt), ReflectionHelper.AllFlags),
+                        typeof(FixEclipseButton).GetMethod(nameof(FixEclipseButton.FixIt), ReflectionHelper.AllFlags),
                         hookConfig
                     );
     }
