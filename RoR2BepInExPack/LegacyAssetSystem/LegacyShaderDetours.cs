@@ -1,5 +1,6 @@
 ﻿using MonoMod.RuntimeDetour;
 using RoR2;
+using RoR2BepInExPack.Reflection;
 using System.Reflection;
 using UnityEngine;
 
@@ -13,12 +14,10 @@ internal static class LegacyShaderDetours
 
     internal static void Init()
     {
-        const BindingFlags allFlags = (BindingFlags)(-1);
-
         var shaderFindDetourConfig = new NativeDetourConfig { ManualApply = true };
         _shaderFindDetour = new NativeDetour(
-                typeof(Shader).GetMethod(nameof(Shader.Find), allFlags, null, new[] { typeof(string) }, null),
-                typeof(LegacyShaderDetours).GetMethod(nameof(OnShaderFind), allFlags),
+                typeof(Shader).GetMethod(nameof(Shader.Find), ReflectionHelper.AllFlags, null, new[] { typeof(string) }, null),
+                typeof(LegacyShaderDetours).GetMethod(nameof(OnShaderFind), ReflectionHelper.AllFlags),
                 shaderFindDetourConfig
             );
         _origFind = _shaderFindDetour.GenerateTrampoline<ShaderFindDefinition>();
