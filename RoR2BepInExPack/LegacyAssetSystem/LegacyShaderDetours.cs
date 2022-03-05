@@ -3,7 +3,7 @@ using RoR2;
 using System.Reflection;
 using UnityEngine;
 
-namespace RoR2BepInExPack;
+namespace RoR2BepInExPack.LegacyAssetSystem;
 
 internal static class LegacyShaderDetours
 {

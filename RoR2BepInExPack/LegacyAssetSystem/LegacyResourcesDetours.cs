@@ -1,12 +1,13 @@
 ﻿global using UnityObject = UnityEngine.Object;
 using MonoMod.RuntimeDetour;
 using RoR2;
+using RoR2BepInExPack.Reflection;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 
-namespace RoR2BepInExPack;
+namespace RoR2BepInExPack.LegacyAssetSystem;
 
 internal static class LegacyResourcesDetours
 {
@@ -28,14 +29,12 @@ internal static class LegacyResourcesDetours
 
     internal static void Init()
     {
-        const BindingFlags allFlags = (BindingFlags)(-1);
-
-        _legacyResourcesAPILoad = typeof(LegacyResourcesAPI).GetMethod(nameof(LegacyResourcesAPI.Load), allFlags);
+        _legacyResourcesAPILoad = typeof(LegacyResourcesAPI).GetMethod(nameof(LegacyResourcesAPI.Load), ReflectionHelper.AllFlags);
 
         var resourcesLoadDetourConfig = new NativeDetourConfig { ManualApply = true };
         _resourcesLoadDetour = new NativeDetour(
-                typeof(Resources).GetMethod(nameof(Resources.Load), allFlags, null, new[] { typeof(string), typeof(Type) }, null),
-                typeof(LegacyResourcesDetours).GetMethod(nameof(OnResourcesLoad), allFlags),
+                typeof(Resources).GetMethod(nameof(Resources.Load), ReflectionHelper.AllFlags, null, new[] { typeof(string), typeof(Type) }, null),
+                typeof(LegacyResourcesDetours).GetMethod(nameof(OnResourcesLoad), ReflectionHelper.AllFlags),
                 resourcesLoadDetourConfig
             );
         _origLoad = _resourcesLoadDetour.GenerateTrampoline<ResourcesLoadDefinition>();
