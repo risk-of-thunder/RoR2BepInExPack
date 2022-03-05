@@ -1,4 +1,7 @@
 using BepInEx;
+using RoR2;
+using RoR2BepInExPack.LegacyAssetSystem;
+using RoR2BepInExPack.VanillaFixes;
 
 namespace RoR2BepInExPack;
 
@@ -13,12 +16,25 @@ public class RoR2BepInExPack : BaseUnityPlugin
     {
         Log.Init(Logger);
 
+        RoR2Application.isModded = true;
+
+        InitHooks();
+    }
+
+    private void InitHooks()
+    {
+        FixConsoleLog.Init();
+        FixEclipseButton.Init();
+
         LegacyResourcesDetours.Init();
         LegacyShaderDetours.Init();
     }
 
     private void OnEnable()
     {
+        FixConsoleLog.Enable();
+        FixEclipseButton.Enable();
+
         LegacyResourcesDetours.Enable();
         LegacyShaderDetours.Enable();
     }
@@ -27,11 +43,17 @@ public class RoR2BepInExPack : BaseUnityPlugin
     {
         LegacyShaderDetours.Disable();
         LegacyResourcesDetours.Disable();
+
+        FixEclipseButton.Disable();
+        FixConsoleLog.Disable();
     }
 
     private void OnDestroy()
     {
         LegacyShaderDetours.Destroy();
         LegacyResourcesDetours.Destroy();
+
+        FixEclipseButton.Destroy();
+        FixConsoleLog.Destroy();
     }
 }
