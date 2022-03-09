@@ -8,9 +8,9 @@ namespace RoR2BepInExPack;
 [BepInPlugin(PluginGUID, PluginName, PluginVersion)]
 public class RoR2BepInExPack : BaseUnityPlugin
 {
-    public const string PluginGUID = "riskofthunder";
+    public const string PluginGUID = "___riskofthunder" + "." + PluginName;
     public const string PluginName = "RoR2BepInExPack";
-    public const string PluginVersion = "1.0.0";
+    public const string PluginVersion = "1.0.1";
 
     private void Awake()
     {
