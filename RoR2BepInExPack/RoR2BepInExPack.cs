@@ -24,6 +24,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
     private void InitHooks()
     {
         ILLine.Init();
+        SaferSearchableAttribute.Init();
         FixConsoleLog.Init();
         FixEclipseButton.Init();
 
@@ -34,6 +35,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
     private void OnEnable()
     {
         ILLine.Enable();
+        SaferSearchableAttribute.Enable();
         FixConsoleLog.Enable();
         FixEclipseButton.Enable();
 
@@ -48,6 +50,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
 
         FixEclipseButton.Disable();
         FixConsoleLog.Disable();
+        SaferSearchableAttribute.Disable();
         ILLine.Disable();
     }
 
@@ -58,6 +61,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
 
         FixEclipseButton.Destroy();
         FixConsoleLog.Destroy();
+        SaferSearchableAttribute.Destroy();
         ILLine.Destroy();
     }
 }
