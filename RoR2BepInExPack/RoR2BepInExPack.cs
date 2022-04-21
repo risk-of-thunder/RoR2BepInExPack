@@ -26,7 +26,6 @@ public class RoR2BepInExPack : BaseUnityPlugin
         ILLine.Init();
         SaferSearchableAttribute.Init();
         FixConsoleLog.Init();
-        FixEclipseButton.Init();
 
         LegacyResourcesDetours.Init();
         LegacyShaderDetours.Init();
@@ -37,7 +36,6 @@ public class RoR2BepInExPack : BaseUnityPlugin
         ILLine.Enable();
         SaferSearchableAttribute.Enable();
         FixConsoleLog.Enable();
-        FixEclipseButton.Enable();
 
         LegacyResourcesDetours.Enable();
         LegacyShaderDetours.Enable();
@@ -48,7 +46,6 @@ public class RoR2BepInExPack : BaseUnityPlugin
         LegacyShaderDetours.Disable();
         LegacyResourcesDetours.Disable();
 
-        FixEclipseButton.Disable();
         FixConsoleLog.Disable();
         SaferSearchableAttribute.Disable();
         ILLine.Disable();
@@ -59,7 +56,6 @@ public class RoR2BepInExPack : BaseUnityPlugin
         LegacyShaderDetours.Destroy();
         LegacyResourcesDetours.Destroy();
 
-        FixEclipseButton.Destroy();
         FixConsoleLog.Destroy();
         SaferSearchableAttribute.Destroy();
         ILLine.Destroy();
