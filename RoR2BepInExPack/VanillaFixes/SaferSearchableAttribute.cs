@@ -83,15 +83,9 @@ internal class SaferSearchableAttribute
             return;
         }
 
-        Type[] assemblyTypes;
-        try
+        if (ReflectionHelper.GetTypesSafe(assembly, out var assemblyTypes))
         {
-            assemblyTypes = assembly.GetTypes();
-        }
-        catch (ReflectionTypeLoadException re)
-        {
-            assemblyTypes = re.Types;
-            Log.Debug("assembly.GetTypes() failed for : " + assembly.FullName + Environment.NewLine + "Not all types will be scanned.");
+            Log.Debug($"{nameof(SaferSearchableAttribute)} - assembly.GetTypes() failed for : " + assembly.FullName + Environment.NewLine + "Not all types will be scanned.");
         }
 
         foreach (var type in assemblyTypes)
