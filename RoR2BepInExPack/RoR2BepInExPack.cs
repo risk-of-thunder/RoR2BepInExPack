@@ -24,6 +24,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
     private void InitHooks()
     {
         ILLine.Init();
+        SaferAchievementManager.Init();
         SaferSearchableAttribute.Init();
         FixConsoleLog.Init();
 
@@ -34,6 +35,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
     private void OnEnable()
     {
         ILLine.Enable();
+        SaferAchievementManager.Enable();
         SaferSearchableAttribute.Enable();
         FixConsoleLog.Enable();
 
@@ -48,6 +50,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
 
         FixConsoleLog.Disable();
         SaferSearchableAttribute.Disable();
+        SaferAchievementManager.Disable();
         ILLine.Disable();
     }
 
@@ -58,6 +61,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
 
         FixConsoleLog.Destroy();
         SaferSearchableAttribute.Destroy();
+        SaferAchievementManager.Destroy();
         ILLine.Destroy();
     }
 }
