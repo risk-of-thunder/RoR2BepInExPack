@@ -12,6 +12,7 @@ namespace RoR2BepInExPack.VanillaFixes;
 // Fix : Make it so the exceptions are catched for each loop iteration
 // Because its a cctor, we'll have to rerun it because it'll run before we have a chance to hook it
 // Hopefully its only temporary and HG fixes it
+// Note: the one in the RoR2.dll is a fake, its not actually used anywhere
 internal class SaferSearchableAttribute
 {
     private static Hook _saferCctorHook;
