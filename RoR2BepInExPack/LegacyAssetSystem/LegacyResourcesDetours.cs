@@ -1,10 +1,10 @@
 ﻿global using UnityObject = UnityEngine.Object;
-using MonoMod.RuntimeDetour;
-using RoR2;
-using RoR2BepInExPack.Reflection;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using MonoMod.RuntimeDetour;
+using RoR2;
+using RoR2BepInExPack.Reflection;
 using UnityEngine;
 
 namespace RoR2BepInExPack.LegacyAssetSystem;

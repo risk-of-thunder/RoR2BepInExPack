@@ -1,8 +1,8 @@
-﻿using MonoMod.Cil;
+﻿using System;
+using System.Diagnostics;
+using MonoMod.Cil;
 using MonoMod.RuntimeDetour;
 using RoR2BepInExPack.Reflection;
-using System;
-using System.Diagnostics;
 
 namespace RoR2BepInExPack.VanillaFixes;
 

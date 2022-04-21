@@ -1,7 +1,6 @@
 ﻿using MonoMod.RuntimeDetour;
 using RoR2;
 using RoR2BepInExPack.Reflection;
-using System.Reflection;
 using UnityEngine;
 
 namespace RoR2BepInExPack.LegacyAssetSystem;

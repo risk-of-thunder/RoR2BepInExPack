@@ -1,10 +1,10 @@
-﻿using HG.Reflection;
-using MonoMod.RuntimeDetour;
-using RoR2BepInExPack.Reflection;
-using System;
+﻿using System;
 using System.Collections;
 using System.Linq;
 using System.Reflection;
+using HG.Reflection;
+using MonoMod.RuntimeDetour;
+using RoR2BepInExPack.Reflection;
 
 namespace RoR2BepInExPack.VanillaFixes;
 
@@ -53,7 +53,7 @@ internal class SaferSearchableAttribute
         _saferCctorHook.Free();
     }
 
-    private static void TryCatchEachLoopIteration(Action orig)
+    private static void TryCatchEachLoopIteration(Action _)
     {
         foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
         {
@@ -93,9 +93,9 @@ internal class SaferSearchableAttribute
             Log.Debug("assembly.GetTypes() failed for : " + assembly.FullName + Environment.NewLine + "Not all types will be scanned.");
         }
 
-        foreach (Type type in assemblyTypes)
+        foreach (var type in assemblyTypes)
         {
-            SearchableAttribute[] typeCustomAttributes = Array.Empty<SearchableAttribute>();
+            var typeCustomAttributes = Array.Empty<SearchableAttribute>();
             try
             {
                 typeCustomAttributes = type.GetCustomAttributes(false).Where(a => a is SearchableAttribute).Cast<SearchableAttribute>().ToArray();
@@ -105,7 +105,7 @@ internal class SaferSearchableAttribute
                 Log.Debug("ScanAssembly type.GetCustomAttributes(false) failed for :  " + type.FullName + Environment.NewLine + ex);
             }
 
-            foreach (SearchableAttribute attribute in typeCustomAttributes)
+            foreach (var attribute in typeCustomAttributes)
             {
                 try
                 {
@@ -120,7 +120,7 @@ internal class SaferSearchableAttribute
                 }
             }
 
-            MemberInfo[] memberInfos = Array.Empty<MemberInfo>();
+            var memberInfos = Array.Empty<MemberInfo>();
             try
             {
                 memberInfos = type.GetMembers(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
@@ -133,9 +133,9 @@ internal class SaferSearchableAttribute
                     ex);
             }
 
-            foreach (MemberInfo memberInfo in memberInfos)
+            foreach (var memberInfo in memberInfos)
             {
-                SearchableAttribute[] memberInfoCustomAttributes = Array.Empty<SearchableAttribute>();
+                var memberInfoCustomAttributes = Array.Empty<SearchableAttribute>();
                 try
                 {
                     memberInfoCustomAttributes = memberInfo.GetCustomAttributes(false).Where(a => a is SearchableAttribute).Cast<SearchableAttribute>().ToArray();
@@ -150,7 +150,7 @@ internal class SaferSearchableAttribute
                         ex);
                 }
 
-                foreach (SearchableAttribute attribute in memberInfoCustomAttributes)
+                foreach (var attribute in memberInfoCustomAttributes)
                 {
                     try
                     {
