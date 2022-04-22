@@ -12,11 +12,14 @@ using UnityEngine;
 namespace RoR2BepInExPack.VanillaFixes;
 
 // SaferAchievementManager SystemInitializer method use GetTypes
-// on every assembly of the appdomain without handling type loading exceptions
-internal class SaferAchievementManager
+// on every assembly of the appdomain without handling type loading exceptions.
+// Also add convenient action event in the method for easy addition of defs
+public class SaferAchievementManager
 {
     private static Hook _hook;
     private static FieldInfo _achievementManagerOnAchievementsRegisteredFieldInfo;
+
+    public static event Action<List<string>, Dictionary<string, AchievementDef>, List<AchievementDef>> OnCollectAchievementDefs;
 
     internal static void Init()
     {
@@ -146,6 +149,8 @@ internal class SaferAchievementManager
                 }
             }
         }
+
+        OnCollectAchievementDefs?.Invoke(AchievementManager.achievementIdentifiers, achievementIdentifierToDef, achievementDefs);
 
         AchievementManager.achievementDefs = achievementDefs.ToArray();
         AchievementManager.SortAchievements(AchievementManager.achievementDefs);
