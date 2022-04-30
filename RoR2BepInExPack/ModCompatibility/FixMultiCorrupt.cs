@@ -74,6 +74,9 @@ internal class FixMultiCorrupt
             c.Emit(OpCodes.Ldarg,1);
             c.EmitDelegate<Func<Inventory,ItemIndex,ItemIndex>>((inventory,pureItem) =>{
                 List<ItemIndex> possibilities = inventory.itemAcquisitionOrder.Where(item => ContagiousItemManager.GetOriginalItemIndex(item) == pureItem).ToList();
+                    if(possibilities.Count == 0){
+                      possibilities = ContagiousItemManager.transformationInfos.Where((info) => info.originalItem == pureItem).Select((info) => info.transformedItem).ToList();
+                    }
                     switch(contagionPriority.Value){
                         case ContagionPriority.First:
                           return possibilities.First();
