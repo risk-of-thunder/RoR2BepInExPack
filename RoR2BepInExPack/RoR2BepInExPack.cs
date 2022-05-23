@@ -2,6 +2,7 @@ using BepInEx;
 using RoR2;
 using RoR2BepInExPack.LegacyAssetSystem;
 using RoR2BepInExPack.VanillaFixes;
+using RoR2BepInExPack.GlobalEliteRampSolution;
 
 namespace RoR2BepInExPack;
 
@@ -30,6 +31,8 @@ public class RoR2BepInExPack : BaseUnityPlugin
 
         LegacyResourcesDetours.Init();
         LegacyShaderDetours.Init();
+
+        EliteRampManager.Init();
     }
 
     private void OnEnable()
@@ -41,6 +44,8 @@ public class RoR2BepInExPack : BaseUnityPlugin
 
         LegacyResourcesDetours.Enable();
         LegacyShaderDetours.Enable();
+
+        EliteRampManager.Enable();
     }
 
     private void OnDisable()
@@ -52,6 +57,8 @@ public class RoR2BepInExPack : BaseUnityPlugin
         SaferSearchableAttribute.Disable();
         SaferAchievementManager.Disable();
         ILLine.Disable();
+
+        EliteRampManager.Disable();
     }
 
     private void OnDestroy()
@@ -63,5 +70,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
         SaferSearchableAttribute.Destroy();
         SaferAchievementManager.Destroy();
         ILLine.Destroy();
+
+        EliteRampManager.Destroy();
     }
 }
