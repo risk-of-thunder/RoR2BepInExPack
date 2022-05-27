@@ -12,7 +12,8 @@ namespace RoR2BepInExPack.GlobalEliteRampSolution;
 
 public static class EliteRampManager
 {
-    internal static Dictionary<EliteDef, Texture2D> eliteToTexture = new();
+    internal static List<(EliteDef, Texture2D)> elitesAndRamps = new();
+    internal static Dictionary<EliteIndex, Texture2D> eliteIndexToTexture = new();
     private static ILHook ilHook;
     private static Texture2D vanillaEliteRamp;
     private static int EliteRampPropertyID => Shader.PropertyToID("_EliteRamp");
@@ -20,10 +21,10 @@ public static class EliteRampManager
     {
         try
         {
-            if (eliteToTexture.ContainsKey(def))
-                throw new InvalidOperationException($"Cannot add EliteDef {def} as its already in the dictionary");
+            if (def.shaderEliteRampIndex > 0) //An index of -1 (which is the default one) or lower causes no color remap to occur.
+                def.shaderEliteRampIndex = 0;
 
-            eliteToTexture.Add(def, ramp);
+            elitesAndRamps.Add((def, ramp));
         }
         catch (Exception ex)
         {
@@ -47,21 +48,34 @@ public static class EliteRampManager
 
     private static void UpdateRampProperly(CharacterModel charModel)
     {
-        EliteDef myEliteDef = EliteCatalog.GetEliteDef(charModel.myEliteIndex);
-        if(eliteToTexture.TryGetValue(myEliteDef, out var ramp))
+        if(charModel.myEliteIndex != EliteIndex.None && eliteIndexToTexture.TryGetValue(charModel.myEliteIndex, out var ramp))
         {
             charModel.propertyStorage.SetTexture(EliteRampPropertyID, ramp);
             return;
         }
-
         charModel.propertyStorage.SetTexture(EliteRampPropertyID, vanillaEliteRamp);
     }
 
+    private static void SetupDictionary()
+    {
+        Log.Debug($"Setting up dictionary");
+        foreach(var tuple in elitesAndRamps)
+        {
+            var def = tuple.Item1;
+            var ramp = tuple.Item2;
+
+            eliteIndexToTexture[def.eliteIndex] = ramp;
+            Log.Debug($"Tying index {def.eliteIndex} ({def}) to {ramp})");
+        }
+        elitesAndRamps.Clear();
+    }
     #region Init,Enable,Disable,Destroy
     internal static async void Init()
     {
+        RoR2Application.onLoad += SetupDictionary;
+        
         var hookConfig = new HookConfig() { ManualApply = true };
-        ilHook = new ILHook(typeof(CharacterModel).GetMethod(nameof(CharacterModel.UpdateMaterials)), ILUpdateRampProperly);
+        ilHook = new ILHook(typeof(CharacterModel).GetMethod(nameof(CharacterModel.UpdateMaterials), System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance), ILUpdateRampProperly);
 
         vanillaEliteRamp = await Addressables.LoadAssetAsync<Texture2D>("RoR2/Base/Common/ColorRamps/texRampElites.psd").Task;
     }
