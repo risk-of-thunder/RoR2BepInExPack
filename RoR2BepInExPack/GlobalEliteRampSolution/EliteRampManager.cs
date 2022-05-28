@@ -31,19 +31,27 @@ public static class EliteRampManager
             Log.Error(ex);
         }
     }
+
     private static void ILUpdateRampProperly(ILContext il)
     {
         ILCursor c = new ILCursor(il);
-        c.GotoNext(MoveType.After,
-            x => x.MatchLdarg(0),
-            x => x.MatchLdfld<CharacterModel>(nameof(CharacterModel.propertyStorage)),
-            x => x.MatchLdsfld(typeof(CommonShaderProperties), nameof(CommonShaderProperties._EliteIndex)));
+        var firstMatchSuccesful = c.TryGotoNext(MoveType.After,
+                                    x => x.MatchLdarg(0),
+                                    x => x.MatchLdfld<CharacterModel>(nameof(CharacterModel.propertyStorage)),
+                                    x => x.MatchLdsfld(typeof(CommonShaderProperties), nameof(CommonShaderProperties._EliteIndex)));
 
-        c.GotoNext(MoveType.After,
-            x => x.MatchCallOrCallvirt<MaterialPropertyBlock>(nameof(MaterialPropertyBlock.SetFloat)));
+        var secondMatchSuccesful = c.TryGotoNext(MoveType.After,
+                                     x => x.MatchCallOrCallvirt<MaterialPropertyBlock>(nameof(MaterialPropertyBlock.SetFloat)));
 
-        c.Emit(OpCodes.Ldarg, 0);
-        c.EmitDelegate(UpdateRampProperly);
+        if(firstMatchSuccesful && secondMatchSuccesful)
+        {
+            c.Emit(OpCodes.Ldarg, 0);
+            c.EmitDelegate(UpdateRampProperly);
+        }
+        else
+        {
+            Log.Error($"Elite Ramp ILHook failed");
+        }
     }
 
     private static void UpdateRampProperly(CharacterModel charModel)
