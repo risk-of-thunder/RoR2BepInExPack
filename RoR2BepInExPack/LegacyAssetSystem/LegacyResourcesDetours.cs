@@ -29,15 +29,22 @@ internal static class LegacyResourcesDetours
 
     internal static void Init()
     {
-        _legacyResourcesAPILoad = typeof(LegacyResourcesAPI).GetMethod(nameof(LegacyResourcesAPI.Load), ReflectionHelper.AllFlags);
+        try
+        {
+            _legacyResourcesAPILoad = typeof(LegacyResourcesAPI).GetMethod(nameof(LegacyResourcesAPI.Load), ReflectionHelper.AllFlags);
 
-        var resourcesLoadDetourConfig = new NativeDetourConfig { ManualApply = true };
-        _resourcesLoadDetour = new NativeDetour(
-                typeof(Resources).GetMethod(nameof(Resources.Load), ReflectionHelper.AllFlags, null, new[] { typeof(string), typeof(Type) }, null),
-                typeof(LegacyResourcesDetours).GetMethod(nameof(OnResourcesLoad), ReflectionHelper.AllFlags),
-                resourcesLoadDetourConfig
-            );
-        _origLoad = _resourcesLoadDetour.GenerateTrampoline<ResourcesLoadDefinition>();
+            var resourcesLoadDetourConfig = new NativeDetourConfig { ManualApply = true };
+            _resourcesLoadDetour = new NativeDetour(
+                    typeof(Resources).GetMethod(nameof(Resources.Load), ReflectionHelper.AllFlags, null, new[] { typeof(string), typeof(Type) }, null),
+                    typeof(LegacyResourcesDetours).GetMethod(nameof(OnResourcesLoad), ReflectionHelper.AllFlags),
+                    resourcesLoadDetourConfig
+                );
+            _origLoad = _resourcesLoadDetour.GenerateTrampoline<ResourcesLoadDefinition>();
+        }
+        catch (Exception ex)
+        {
+            Log.Error($"{nameof(LegacyResourcesDetours)} failed to initialize: {ex}");
+        }
     }
 
     internal static void Enable()

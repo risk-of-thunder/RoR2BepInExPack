@@ -1,4 +1,5 @@
-﻿using MonoMod.RuntimeDetour;
+﻿using System;
+using MonoMod.RuntimeDetour;
 using RoR2;
 using RoR2BepInExPack.Reflection;
 using UnityEngine;
@@ -13,13 +14,20 @@ internal static class LegacyShaderDetours
 
     internal static void Init()
     {
-        var shaderFindDetourConfig = new NativeDetourConfig { ManualApply = true };
-        _shaderFindDetour = new NativeDetour(
-                typeof(Shader).GetMethod(nameof(Shader.Find), ReflectionHelper.AllFlags, null, new[] { typeof(string) }, null),
-                typeof(LegacyShaderDetours).GetMethod(nameof(OnShaderFind), ReflectionHelper.AllFlags),
-                shaderFindDetourConfig
-            );
-        _origFind = _shaderFindDetour.GenerateTrampoline<ShaderFindDefinition>();
+        try
+        {
+            var shaderFindDetourConfig = new NativeDetourConfig { ManualApply = true };
+            _shaderFindDetour = new NativeDetour(
+                    typeof(Shader).GetMethod(nameof(Shader.Find), ReflectionHelper.AllFlags, null, new[] { typeof(string) }, null),
+                    typeof(LegacyShaderDetours).GetMethod(nameof(OnShaderFind), ReflectionHelper.AllFlags),
+                    shaderFindDetourConfig
+                );
+            _origFind = _shaderFindDetour.GenerateTrampoline<ShaderFindDefinition>();
+        }
+        catch(Exception ex)
+        {
+            Log.Error($"{nameof(LegacyShaderDetours)} failed to initialize: {ex}");
+        }
     }
 
     internal static void Enable()

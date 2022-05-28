@@ -14,8 +14,15 @@ internal class ILLine
 
     internal static void Init()
     {
-        var hookConfig = new HookConfig() { ManualApply = true };
-        _hook = new ILHook(typeof(StackTrace).GetMethod("AddFrames", ReflectionHelper.AllFlags), new ILContext.Manipulator(ShowILLine));
+        try
+        {
+            var hookConfig = new HookConfig() { ManualApply = true };
+            _hook = new ILHook(typeof(StackTrace).GetMethod("AddFrames", ReflectionHelper.AllFlags), new ILContext.Manipulator(ShowILLine));
+        }
+        catch (Exception ex)
+        {
+            Log.Error($"{nameof(ILLine)} failed to initialize: {ex}");
+        }
     }
 
     internal static void Enable()

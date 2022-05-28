@@ -21,19 +21,26 @@ internal class SaferSearchableAttribute
 
     internal static void Init()
     {
-        var hookConfig = new HookConfig() { ManualApply = true };
+        try
+        {
+            var hookConfig = new HookConfig() { ManualApply = true };
 
-        _saferCctorHook = new Hook(
-                        typeof(SearchableAttribute).GetMethod(nameof(SearchableAttribute.ScanAllAssemblies), ReflectionHelper.AllFlags),
-                        typeof(SaferSearchableAttribute).GetMethod(nameof(SaferSearchableAttribute.TryCatchEachLoopIteration), ReflectionHelper.AllFlags),
-                        hookConfig
-                    );
+            _saferCctorHook = new Hook(
+                            typeof(SearchableAttribute).GetMethod(nameof(SearchableAttribute.ScanAllAssemblies), ReflectionHelper.AllFlags),
+                            typeof(SaferSearchableAttribute).GetMethod(nameof(SaferSearchableAttribute.TryCatchEachLoopIteration), ReflectionHelper.AllFlags),
+                            hookConfig
+                        );
 
-        _deterministicCctorTimingHook = new Hook(
-                        typeof(RoR2.RoR2Application).GetMethod(nameof(RoR2.RoR2Application.OnLoad), ReflectionHelper.AllFlags),
-                        typeof(SaferSearchableAttribute).GetMethod(nameof(SaferSearchableAttribute.DeterministicCctorTiming), ReflectionHelper.AllFlags),
-                        hookConfig
-                    );
+            _deterministicCctorTimingHook = new Hook(
+                            typeof(RoR2.RoR2Application).GetMethod(nameof(RoR2.RoR2Application.OnLoad), ReflectionHelper.AllFlags),
+                            typeof(SaferSearchableAttribute).GetMethod(nameof(SaferSearchableAttribute.DeterministicCctorTiming), ReflectionHelper.AllFlags),
+                            hookConfig
+                        );
+        }
+        catch (Exception ex)
+        {
+            Log.Error($"{nameof(SaferSearchableAttribute)} failed to initialize: {ex}");
+        }
     }
 
     internal static void Enable()

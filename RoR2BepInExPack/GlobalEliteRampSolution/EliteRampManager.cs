@@ -80,12 +80,19 @@ public static class EliteRampManager
     #region Init,Enable,Disable,Destroy
     internal static async void Init()
     {
-        RoR2Application.onLoad += SetupDictionary;
+        try
+        {
+            RoR2Application.onLoad += SetupDictionary;
         
-        var hookConfig = new HookConfig() { ManualApply = true };
-        ilHook = new ILHook(typeof(CharacterModel).GetMethod(nameof(CharacterModel.UpdateMaterials), System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance), ILUpdateRampProperly);
+            var hookConfig = new HookConfig() { ManualApply = true };
+            ilHook = new ILHook(typeof(CharacterModel).GetMethod(nameof(CharacterModel.UpdateMaterials), System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance), ILUpdateRampProperly);
 
-        vanillaEliteRamp = await Addressables.LoadAssetAsync<Texture2D>("RoR2/Base/Common/ColorRamps/texRampElites.psd").Task;
+            vanillaEliteRamp = await Addressables.LoadAssetAsync<Texture2D>("RoR2/Base/Common/ColorRamps/texRampElites.psd").Task;
+        }
+        catch (Exception ex)
+        {
+            Log.Error($"{nameof(EliteRampManager)} failed to initialize: {ex}");
+        }
     }
 
     internal static void Enable()

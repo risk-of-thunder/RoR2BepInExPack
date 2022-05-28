@@ -1,4 +1,5 @@
-﻿using MonoMod.RuntimeDetour;
+﻿using System;
+using MonoMod.RuntimeDetour;
 using RoR2;
 using RoR2BepInExPack.Reflection;
 
@@ -10,12 +11,19 @@ internal class FixConsoleLog
 
     internal static void Init()
     {
-        var hookConfig = new HookConfig() { ManualApply = true };
-        _hook = new Hook(
-                        typeof(UnitySystemConsoleRedirector).GetMethod(nameof(UnitySystemConsoleRedirector.Redirect), ReflectionHelper.AllFlags),
-                        typeof(FixConsoleLog).GetMethod(nameof(FixConsoleLog.DoNothing), ReflectionHelper.AllFlags),
-                        hookConfig
-                    );
+        try
+        {
+            var hookConfig = new HookConfig() { ManualApply = true };
+            _hook = new Hook(
+                            typeof(UnitySystemConsoleRedirector).GetMethod(nameof(UnitySystemConsoleRedirector.Redirect), ReflectionHelper.AllFlags),
+                            typeof(FixConsoleLog).GetMethod(nameof(FixConsoleLog.DoNothing), ReflectionHelper.AllFlags),
+                            hookConfig
+                        );
+        }
+        catch(Exception ex)
+        {
+            Log.Error($"{nameof(FixConsoleLog)} failed to initialize: {ex}");
+        }
     }
 
     internal static void Enable()

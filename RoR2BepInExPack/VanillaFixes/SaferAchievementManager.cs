@@ -23,15 +23,22 @@ public class SaferAchievementManager
 
     internal static void Init()
     {
-        var hookConfig = new HookConfig() { ManualApply = true };
+        try
+        {
+            var hookConfig = new HookConfig() { ManualApply = true };
 
-        _hook = new Hook(
-                        typeof(AchievementManager).GetMethod(nameof(AchievementManager.CollectAchievementDefs), ReflectionHelper.AllFlags),
-                        typeof(SaferAchievementManager).GetMethod(nameof(SaferAchievementManager.SaferCollectAchievementDefs), ReflectionHelper.AllFlags),
-                        hookConfig
-                    );
+            _hook = new Hook(
+                            typeof(AchievementManager).GetMethod(nameof(AchievementManager.CollectAchievementDefs), ReflectionHelper.AllFlags),
+                            typeof(SaferAchievementManager).GetMethod(nameof(SaferAchievementManager.SaferCollectAchievementDefs), ReflectionHelper.AllFlags),
+                            hookConfig
+                        );
 
-        _achievementManagerOnAchievementsRegisteredFieldInfo = typeof(AchievementManager).GetField(nameof(AchievementManager.onAchievementsRegistered), ReflectionHelper.AllFlags);
+            _achievementManagerOnAchievementsRegisteredFieldInfo = typeof(AchievementManager).GetField(nameof(AchievementManager.onAchievementsRegistered), ReflectionHelper.AllFlags);
+        }
+        catch(Exception ex)
+        {
+            Log.Error($"{nameof(SaferAchievementManager)} failed to initialize: {ex}");
+        }
     }
 
     internal static void Enable()
