@@ -11,7 +11,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
 {
     public const string PluginGUID = "___riskofthunder" + "." + PluginName;
     public const string PluginName = "RoR2BepInExPack";
-    public const string PluginVersion = "1.0.3";
+    public const string PluginVersion = "1.1.0";
 
     private void Awake()
     {
@@ -44,12 +44,14 @@ public class RoR2BepInExPack : BaseUnityPlugin
 
         LegacyResourcesDetours.Enable();
         LegacyShaderDetours.Enable();
-    
+
         FixMultiCorrupt.Enable();
     }
 
     private void OnDisable()
     {
+        FixMultiCorrupt.Disable();
+
         LegacyShaderDetours.Disable();
         LegacyResourcesDetours.Disable();
 
@@ -57,12 +59,12 @@ public class RoR2BepInExPack : BaseUnityPlugin
         SaferSearchableAttribute.Disable();
         SaferAchievementManager.Disable();
         ILLine.Disable();
-
-        FixMultiCorrupt.Disable();
     }
 
     private void OnDestroy()
     {
+        FixMultiCorrupt.Destroy();
+
         LegacyShaderDetours.Destroy();
         LegacyResourcesDetours.Destroy();
 
@@ -70,7 +72,5 @@ public class RoR2BepInExPack : BaseUnityPlugin
         SaferSearchableAttribute.Destroy();
         SaferAchievementManager.Destroy();
         ILLine.Destroy();
-
-        FixMultiCorrupt.Destroy();
     }
 }
