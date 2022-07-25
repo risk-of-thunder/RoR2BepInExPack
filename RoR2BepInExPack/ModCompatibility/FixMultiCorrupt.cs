@@ -110,7 +110,9 @@ internal class FixMultiCorrupt
                 }
             });
         }
+        else
+        {
+            Log.Error("FixMultiCorrupt TryGotoNext failed, not applying patch");
+        }
     }
-
-
 }
