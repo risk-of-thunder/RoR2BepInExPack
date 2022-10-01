@@ -29,6 +29,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
         SaferSearchableAttribute.Init();
         FixConsoleLog.Init();
         FixDeathAnimLog.Init();
+        FixNullBone.Init();
 
         LegacyResourcesDetours.Init();
         LegacyShaderDetours.Init();
@@ -43,6 +44,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
         SaferSearchableAttribute.Enable();
         FixConsoleLog.Enable();
         FixDeathAnimLog.Enable();
+        FixNullBone.Enable();
 
         LegacyResourcesDetours.Enable();
         LegacyShaderDetours.Enable();
@@ -57,6 +59,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
         LegacyShaderDetours.Disable();
         LegacyResourcesDetours.Disable();
 
+        FixNullBone.Disable();
         FixDeathAnimLog.Disable();
         FixConsoleLog.Disable();
         SaferSearchableAttribute.Disable();
@@ -71,6 +74,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
         LegacyShaderDetours.Destroy();
         LegacyResourcesDetours.Destroy();
 
+        FixNullBone.Destroy();
         FixDeathAnimLog.Destroy();
         FixConsoleLog.Destroy();
         SaferSearchableAttribute.Destroy();
