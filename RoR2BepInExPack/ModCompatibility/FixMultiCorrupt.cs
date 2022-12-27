@@ -1,22 +1,22 @@
-using BepInEx.Configuration;
-using MonoMod.RuntimeDetour;
-using MonoMod.Cil;
-using RoR2;
-using RoR2.Items;
-using RoR2BepInExPack.Reflection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using BepInEx.Configuration;
 using Mono.Cecil.Cil;
-using System.Runtime.CompilerServices;
+using MonoMod.Cil;
+using MonoMod.RuntimeDetour;
+using RoR2;
+using RoR2.Items;
+using RoR2BepInExPack.Reflection;
+using UnityEngine;
 
 namespace RoR2BepInExPack.ModCompatibility;
 
 internal class FixMultiCorrupt
 {
-    private static ILHook _ilHook;
+    private static ILHook _stepInventoryInfectionILHook;
+    private static Hook _generateStageRNGOnHook;
 
-    private static readonly ConditionalWeakTable<Inventory, Dictionary<ItemIndex, int>> _alternateTracker = new();
     private static Xoroshiro128Plus _voidRNG = null;
     private static ConfigEntry<ContagionPriority> _contagionPriority;
 
@@ -32,27 +32,38 @@ internal class FixMultiCorrupt
     internal static void Init(ConfigFile config)
     {
         _contagionPriority = config.Bind("General", "Contagion Priority", ContagionPriority.Random, "Determines behaviour for when multiple results are available for an item transformation.");
+        
         var ilHookConfig = new ILHookConfig() { ManualApply = true };
-        _ilHook = new ILHook(
+        _stepInventoryInfectionILHook = new ILHook(
                     typeof(ContagiousItemManager).GetMethod(nameof(ContagiousItemManager.StepInventoryInfection),ReflectionHelper.AllFlags),
                     FixStep,
                     ref ilHookConfig
+                );
+
+        var onHookConfig = new HookConfig() { ManualApply = true };
+        _generateStageRNGOnHook = new Hook(
+                    typeof(Run).GetMethod(nameof(Run.GenerateStageRNG), ReflectionHelper.AllFlags),
+                    typeof(FixMultiCorrupt).GetMethod(nameof(OnGenerateStageRNG), ReflectionHelper.AllFlags),
+                    ref onHookConfig
                 );
     }
 
     internal static void Enable()
     {
-        _ilHook.Apply();
+        _stepInventoryInfectionILHook.Apply();
+        _generateStageRNGOnHook.Apply();
     }
 
     internal static void Disable()
     {
-        _ilHook.Undo();
+        _stepInventoryInfectionILHook.Undo();
+        _generateStageRNGOnHook.Undo();
     }
 
     internal static void Destroy()
     {
-        _ilHook.Free();
+        _stepInventoryInfectionILHook.Free();
+        _generateStageRNGOnHook.Free();
     }
 
     private static void FixStep(ILContext il)
@@ -86,23 +97,14 @@ internal class FixMultiCorrupt
                         return possibilities.Last();
 
                     case ContagionPriority.Alternate:
-                        var dict = _alternateTracker.GetOrCreateValue(inventory);
-
-                        if(!dict.ContainsKey(pureItem))
-                            dict.Add(pureItem, 0);
-
-                        return possibilities[dict[pureItem]++ % possibilities.Count];
+                        var tracker = ContagionAlternateTracker.GetOrAdd(inventory);
+                        return possibilities[tracker.AddContagion(pureItem) % possibilities.Count];
 
                     case ContagionPriority.Rarest:
                         possibilities.Sort((item, item2) => ItemCatalog.GetItemDef(item).tier.CompareTo(ItemCatalog.GetItemDef(item2).tier));
                         return possibilities.Last();
 
                     case ContagionPriority.Random:
-                        if (_voidRNG == null)
-                        {
-                            _voidRNG = new Xoroshiro128Plus(Run.instance.stageRng.nextUlong);
-                        }
-
                         return possibilities[_voidRNG.RangeInt(0,possibilities.Count)];
 
                     default:
@@ -113,6 +115,52 @@ internal class FixMultiCorrupt
         else
         {
             Log.Error("FixMultiCorrupt TryGotoNext failed, not applying patch");
+        }
+    }
+
+    private static void OnGenerateStageRNG(Action<Run> orig, Run self)
+    {
+        orig(self);
+
+        _voidRNG = new Xoroshiro128Plus(self.stageRng.nextUlong);
+    }
+
+    private class ContagionAlternateTracker : MonoBehaviour
+    {
+        private static readonly Dictionary<Inventory, ContagionAlternateTracker> instances = new();
+        private readonly Dictionary<ItemIndex, int> contagions = new();
+
+        private Inventory inventory;
+
+        private void Awake()
+        {
+            inventory = GetComponent<Inventory>();
+            instances[inventory] = this;
+        }
+
+        private void OnDestroy()
+        {
+            instances.Remove(inventory);
+        }
+
+        public int AddContagion(ItemIndex itemIndex)
+        {
+            if (contagions.TryGetValue(itemIndex, out var contagion))
+            {
+                return contagions[itemIndex] = contagion + 1;
+            }
+
+            return contagions[itemIndex] = 0;
+        }
+
+        public static ContagionAlternateTracker GetOrAdd(Inventory inventory)
+        {
+            if (instances.TryGetValue(inventory, out var instance))
+            {
+                return instance;
+            }
+
+            return inventory.gameObject.AddComponent<ContagionAlternateTracker>();
         }
     }
 }
