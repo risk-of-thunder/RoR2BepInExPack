@@ -13,7 +13,7 @@ using RoR2;
 namespace RoR2BepInExPack.VanillaFixes;
 
 // The ProjectileCatalog logs an error if more than 256 projectiles are registered, despite the actual limit being much higher.
-// Fix: Update the projectile limit to prevent the misleading error
+// Fix: Skip the projectile limit check to prevent the misleading error
 internal class FixProjectileCatalogLimitError
 {
     private static ILHook _ilHook;
@@ -43,19 +43,20 @@ internal class FixProjectileCatalogLimitError
     {
         ILCursor c = new ILCursor(il);
         int locLimitIndex = -1;
+        ILLabel breakLabel = c.DefineLabel();
         bool ILFound = c.TryGotoNext(MoveType.Before,
-            x => x.MatchLdcI4(out _),
+            x => x.MatchLdcI4(0x100),
             x => x.MatchStloc(out locLimitIndex),
             x => x.MatchLdsfld(typeof(ProjectileCatalog).GetField(nameof(ProjectileCatalog.projectilePrefabs), ReflectionHelper.AllFlags)),
             x => x.MatchLdlen(),
             x => x.MatchConvI4(),
             x => x.MatchLdloc(locLimitIndex),
-            x => x.MatchBle(out _)
+            x => x.MatchBle(out breakLabel)
             );
 
         if (ILFound)
         {
-            c.Next.Operand = int.MaxValue;
+            c.Emit(OpCodes.Br, breakLabel);
         }
         else
         {
