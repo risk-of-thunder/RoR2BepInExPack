@@ -87,6 +87,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
         FixConsoleLog.Destroy();
         SaferSearchableAttribute.Destroy();
         SaferAchievementManager.Destroy();
+        AutoCatchReflectionTypeLoadException.Destroy();
         ILLine.Destroy();
     }
 }
