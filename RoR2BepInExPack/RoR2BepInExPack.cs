@@ -3,6 +3,7 @@ using RoR2;
 using RoR2BepInExPack.LegacyAssetSystem;
 using RoR2BepInExPack.VanillaFixes;
 using RoR2BepInExPack.ModCompatibility;
+using RoR2BepInExPack.ReflectionHooks;
 
 namespace RoR2BepInExPack;
 
@@ -25,6 +26,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
     private void InitHooks()
     {
         ILLine.Init();
+        AutoCatchReflectionTypeLoadException.Init();
         SaferAchievementManager.Init();
         SaferSearchableAttribute.Init();
         FixConsoleLog.Init();
@@ -41,6 +43,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
     private void OnEnable()
     {
         ILLine.Enable();
+        AutoCatchReflectionTypeLoadException.Enable();
         SaferAchievementManager.Enable();
         SaferSearchableAttribute.Enable();
         FixConsoleLog.Enable();
@@ -67,6 +70,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
         FixConsoleLog.Disable();
         SaferSearchableAttribute.Disable();
         SaferAchievementManager.Disable();
+        AutoCatchReflectionTypeLoadException.Disable();
         ILLine.Disable();
     }
 

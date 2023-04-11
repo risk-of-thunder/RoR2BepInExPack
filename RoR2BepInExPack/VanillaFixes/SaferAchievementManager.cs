@@ -71,10 +71,7 @@ public class SaferAchievementManager
 
         foreach (var assembly in assemblies)
         {
-            if (ReflectionHelper.GetTypesSafe(assembly, out var assemblyTypes))
-            {
-                Log.Debug($"{nameof(SaferAchievementManager)} - assembly.GetTypes() failed for : " + assembly.FullName + Environment.NewLine + "Not all types will be scanned.");
-            }
+            var assemblyTypes = assembly.GetTypes();
 
             foreach (var type in from _type in assemblyTypes
                                  where _type.IsSubclassOf(typeof(BaseAchievement))
