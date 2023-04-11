@@ -16,7 +16,10 @@ internal class AutoCatchReflectionTypeLoadException
     {
         var ilHookConfig = new HookConfig() { ManualApply = true };
         _onHook = new Hook(
-                    typeof(Assembly).GetMethod(nameof(Assembly.GetTypes), ReflectionHelper.AllFlags),
+                    typeof(Assembly).GetMethods(ReflectionHelper.AllFlags).
+                    First(
+                        m => m.Name == nameof(Assembly.GetTypes) && m.GetParameters().Length == 0 &&
+                        (m.MethodImplementationFlags & MethodImplAttributes.InternalCall) == 0),
                     typeof(AutoCatchReflectionTypeLoadException).GetMethod(nameof(AutoCatchReflectionTypeLoadException.SaferGetTypes), ReflectionHelper.AllFlags),
                     ref ilHookConfig
                 );
