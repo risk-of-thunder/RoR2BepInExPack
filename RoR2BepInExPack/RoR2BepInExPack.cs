@@ -12,7 +12,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
 {
     public const string PluginGUID = "___riskofthunder" + "." + PluginName;
     public const string PluginName = "RoR2BepInExPack";
-    public const string PluginVersion = "1.3.0";
+    public const string PluginVersion = "1.4.0";
 
     internal static PluginInfo pluginInfo;
 
@@ -37,6 +37,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
         FixDeathAnimLog.Init();
         FixNullBone.Init();
         FixExtraGameModesMenu.Init();
+        FixProjectileCatalogLimitError.Init();
 
         LegacyResourcesDetours.Init();
         LegacyShaderDetours.Init();
@@ -55,6 +56,8 @@ public class RoR2BepInExPack : BaseUnityPlugin
         FixDeathAnimLog.Enable();
         FixNullBone.Enable();
         FixExtraGameModesMenu.Enable();
+        FixProjectileCatalogLimitError.Enable();
+
 
         LegacyResourcesDetours.Enable();
         LegacyShaderDetours.Enable();
@@ -69,6 +72,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
         LegacyShaderDetours.Disable();
         LegacyResourcesDetours.Disable();
 
+        FixProjectileCatalogLimitError.Disable();
         FixExtraGameModesMenu.Disable();
         FixNullBone.Disable();
         FixDeathAnimLog.Disable();
@@ -87,6 +91,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
         LegacyShaderDetours.Destroy();
         LegacyResourcesDetours.Destroy();
 
+        FixProjectileCatalogLimitError.Destroy();
         FixExtraGameModesMenu.Destroy();
         FixNullBone.Destroy();
         FixDeathAnimLog.Destroy();
