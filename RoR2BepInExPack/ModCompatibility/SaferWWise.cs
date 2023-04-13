@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Mono.Cecil.Cil;
+using MonoMod.Cil;
 using MonoMod.RuntimeDetour;
-using RoR2BepInExPack.Reflection;
 using UnityEngine;
 
 namespace RoR2BepInExPack.ModCompatibility;
@@ -12,7 +13,7 @@ namespace RoR2BepInExPack.ModCompatibility;
 // Fix: Properly check and safely return so that the process doesnt get a native engine crash
 internal class SaferWWise
 {
-    private static List<Hook> _hooks = new();
+    private static List<ILHook> _hooks = new();
 
     internal static void Init()
     {
@@ -20,11 +21,11 @@ internal class SaferWWise
             typeof(AkSoundEngine).GetMethods(BindingFlags.Public | BindingFlags.Static).
             Where(m => m.ReturnParameter.ParameterType == typeof(AKRESULT)))
         {
-            var onHookConfig = new HookConfig() { ManualApply = true };
-            _hooks.Add(new Hook(
+            var hookConfig = new ILHookConfig() { ManualApply = true };
+            _hooks.Add(new ILHook(
                 akSoundEngineMethod,
-                typeof(SaferWWise).GetMethod(nameof(EarlyReturnIfNoSoundEngine), ReflectionHelper.AllFlags),
-                ref onHookConfig));
+                EarlyReturnIfNoSoundEngine,
+                ref hookConfig));
         }
     }
 
@@ -52,11 +53,31 @@ internal class SaferWWise
         }
     }
 
-    private static AKRESULT EarlyReturnIfNoSoundEngine(Func<AKRESULT> orig)
+    // early ret START
+    // put 1 on stack if no sound
+    // brfalse // if 0, jump after early ret
+    // ldc i4 put akresult.fail on the stack
+    // return
+    // early ret END
+    // rest of method
+    private static void EarlyReturnIfNoSoundEngine(ILContext il)
     {
-        if (Application.isBatchMode)
-            return AKRESULT.AK_Fail;
+        var c = new ILCursor(il);
 
-        return orig();
+        static bool ReturnTrueIfNoSoundEngine()
+        {
+            return Application.isBatchMode;
+        }
+
+        c.EmitDelegate(ReturnTrueIfNoSoundEngine);
+
+        var indexBeforeEarlyRet = c.Index;
+        c.Emit(OpCodes.Ldc_I4, (int)AKRESULT.AK_Fail);
+        c.Emit(OpCodes.Ret);
+
+        var labelAfterRet = c.MarkLabel();
+
+        c.Index = indexBeforeEarlyRet;
+        c.Emit(OpCodes.Brfalse, labelAfterRet);
     }
 }
