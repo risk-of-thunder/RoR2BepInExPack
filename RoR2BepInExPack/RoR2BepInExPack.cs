@@ -14,11 +14,8 @@ public class RoR2BepInExPack : BaseUnityPlugin
     public const string PluginName = "RoR2BepInExPack";
     public const string PluginVersion = "1.4.0";
 
-    internal static PluginInfo pluginInfo;
-
     private void Awake()
     {
-        pluginInfo = Info;
         Log.Init(Logger);
 
         RoR2Application.isModded = true;
