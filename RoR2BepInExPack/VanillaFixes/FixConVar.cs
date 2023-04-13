@@ -17,7 +17,8 @@ internal static class FixConVar
     internal static void Init()
     {
         var ilHookConfig = new ILHookConfig { ManualApply = true };
-        _ilHook = new ILHook(typeof(RoR2.Console).GetMethod(nameof(RoR2.Console.InitConVars), ReflectionHelper.AllFlags),
+        _ilHook = new ILHook(
+            typeof(RoR2.Console).GetMethod(nameof(RoR2.Console.InitConVars), ReflectionHelper.AllFlags),
             ScanAllAssemblies,
             ref ilHookConfig);
     }
@@ -41,7 +42,7 @@ internal static class FixConVar
         ILCursor c = new ILCursor(il);
         bool ilFound = c.TryGotoNext(MoveType.After, x => x.MatchLdtoken(out _),
             x => x.MatchCallOrCallvirt<Type>(nameof(Type.GetTypeFromHandle)),
-            x => x.MatchCallOrCallvirt<Type>("get_Assembly"),
+            x => x.MatchCallOrCallvirt<Type>("get_" + nameof(Assembly)),
             x => x.MatchCallOrCallvirt<Assembly>(nameof(Assembly.GetTypes)));
 
         if (ilFound)
@@ -54,9 +55,24 @@ internal static class FixConVar
         }
     }
 
-    //We cant load r2api's types because EmbeddedResources causes mono to commit sudoku and die
+    private static bool IsMonoFriendlyType(this Type type)
+    {
+        const string DelegatePointerTypeName = "MonoFNPtrFakeClass";
+
+        if (type.GetFields(ReflectionHelper.AllFlags).Any(fi => fi.FieldType.Name == DelegatePointerTypeName))
+        {
+            Log.Debug($"Not scanning {type} for ConVars due to it containing delegate pointer field(s)");
+            return false;
+        }
+
+        return true;
+    }
+
     private static Type[] LoadAllConVars(Type[] dontCareTypes)
     {
-        return AppDomain.CurrentDomain.GetAssemblies().Where(ass => !ass.FullName.Contains("R2API") && ass.GetCustomAttribute<HG.Reflection.SearchableAttribute.OptInAttribute>() != null).SelectMany(ass => ass.GetTypes()).ToArray();
+        return AppDomain.CurrentDomain.GetAssemblies().
+            Where(ass => ass.GetCustomAttribute<HG.Reflection.SearchableAttribute.OptInAttribute>() != null).
+            SelectMany(ass => ass.GetTypes().Where(t => t.IsMonoFriendlyType())).
+            ToArray();
     }
 }
