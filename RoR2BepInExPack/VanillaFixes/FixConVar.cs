@@ -72,10 +72,22 @@ internal static class FixConVar
         self.allConVars = new();
         self.archiveConVars = new();
 
-        var assTypes = AppDomain.CurrentDomain.GetAssemblies().
-            Where(ass => ass.GetCustomAttribute<HG.Reflection.SearchableAttribute.OptInAttribute>() != null).
-            SelectMany(ass => ass.GetTypes().Where(t => t.IsMonoFriendlyType())).
-            ToArray();
+        var assTypes = new List<Type>();
+
+        foreach (var ass in AppDomain.CurrentDomain.GetAssemblies())
+        {
+            try
+            {
+                if (ass.GetCustomAttribute<HG.Reflection.SearchableAttribute.OptInAttribute>() != null)
+                {
+                    assTypes.AddRange(ass.GetTypes().Where(t => t.IsMonoFriendlyType()));
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Debug(e);
+            }
+        }
 
         foreach (var type in assTypes)
         {
@@ -100,7 +112,7 @@ internal static class FixConVar
                     }
                     catch (Exception e)
                     {
-                        Debug.LogError(e);
+                        Log.Debug(e);
                     }
                 }
 
@@ -130,13 +142,13 @@ internal static class FixConVar
                     }
                     catch (Exception e)
                     {
-                        Debug.LogError(e);
+                        Log.Debug(e);
                     }
                 }
             }
             catch (Exception e)
             {
-                Debug.LogError(e);
+                Log.Debug(e);
             }
         }
 
@@ -155,7 +167,7 @@ internal static class FixConVar
             }
             catch (Exception e)
             {
-                Debug.LogError(e);
+                Log.Error(e);
             }
         }
     }
