@@ -36,6 +36,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
         FixExtraGameModesMenu.Init();
         FixProjectileCatalogLimitError.Init();
         SaferWWise.Init();
+        FixNullEntitlement.Init();
 
         LegacyResourcesDetours.Init();
         LegacyShaderDetours.Init();
@@ -56,6 +57,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
         FixExtraGameModesMenu.Enable();
         FixProjectileCatalogLimitError.Enable();
         SaferWWise.Enable();
+        FixNullEntitlement.Enable();
 
         LegacyResourcesDetours.Enable();
         LegacyShaderDetours.Enable();
@@ -70,6 +72,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
         LegacyShaderDetours.Disable();
         LegacyResourcesDetours.Disable();
 
+        FixNullEntitlement.Disable();
         SaferWWise.Disable();
         FixProjectileCatalogLimitError.Disable();
         FixExtraGameModesMenu.Disable();
@@ -90,6 +93,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
         LegacyShaderDetours.Destroy();
         LegacyResourcesDetours.Destroy();
 
+        FixNullEntitlement.Destroy();
         SaferWWise.Destroy();
         FixProjectileCatalogLimitError.Destroy();
         FixExtraGameModesMenu.Destroy();
