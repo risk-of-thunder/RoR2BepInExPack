@@ -12,7 +12,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
 {
     public const string PluginGUID = "___riskofthunder" + "." + PluginName;
     public const string PluginName = "RoR2BepInExPack";
-    public const string PluginVersion = "1.6.0";
+    public const string PluginVersion = "1.7.0";
 
     private void Awake()
     {
@@ -20,7 +20,26 @@ public class RoR2BepInExPack : BaseUnityPlugin
 
         RoR2Application.isModded = true;
 
+        HookWatcher.Init();
+
         InitHooks();
+    }
+
+    private void OnEnable()
+    {
+        EnableHooks();
+    }
+
+    private void OnDisable()
+    {
+        DisableHooks();
+    }
+
+    private void OnDestroy()
+    {
+        DestroyHooks();
+
+        HookWatcher.Destroy();
     }
 
     private void InitHooks()
@@ -46,7 +65,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
         FixMultiCorrupt.Init(Config);
     }
 
-    private void OnEnable()
+    private static void EnableHooks()
     {
         ILLine.Enable();
         AutoCatchReflectionTypeLoadException.Enable();
@@ -69,7 +88,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
         FixMultiCorrupt.Enable();
     }
 
-    private void OnDisable()
+    private static void DisableHooks()
     {
         FixMultiCorrupt.Disable();
 
@@ -92,7 +111,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
         ILLine.Disable();
     }
 
-    private void OnDestroy()
+    private static void DestroyHooks()
     {
         FixMultiCorrupt.Destroy();
 
