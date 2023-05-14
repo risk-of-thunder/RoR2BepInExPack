@@ -18,9 +18,6 @@
 	<PackageReference Include="UnityEngine.Modules" Version="2019.4.26" />
 	<PackageReference Include="BepInEx.Core" Version="5.4.19" />
     <PackageReference Include="RiskOfRain2.GameLibs" Version="*-*" />
-	<PackageReference Include="MMHOOK.RoR2" Version="*">
-	  <NoWarn>NU1701</NoWarn>
-	</PackageReference>
   </ItemGroup>
 
 </Project>
