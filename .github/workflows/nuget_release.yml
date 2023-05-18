@@ -35,4 +35,4 @@ jobs:
 
         nuget setapikey "${{ secrets.NUGET_API_KEY }}"
 
-        nuget push ./ReleaseOutput/*.nupkg -Source 'https://api.nuget.org/v3/index.json'
+        nuget push ./RoR2BepInExPack/ReleaseOutput/*.nupkg -Source 'https://api.nuget.org/v3/index.json'
