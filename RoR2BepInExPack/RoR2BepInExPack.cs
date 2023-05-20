@@ -12,7 +12,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
 {
     public const string PluginGUID = "___riskofthunder" + "." + PluginName;
     public const string PluginName = "RoR2BepInExPack";
-    public const string PluginVersion = "1.7.0";
+    public const string PluginVersion = "1.8.0";
 
     private void Awake()
     {
@@ -58,6 +58,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
         FixNullEntitlement.Init();
         FixExposeLog.Init();
         FixNonLethalOneHP.Init();
+        FixRunScaling.Init();
 
         LegacyResourcesDetours.Init();
         LegacyShaderDetours.Init();
@@ -81,6 +82,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
         FixNullEntitlement.Enable();
         FixExposeLog.Enable();
         FixNonLethalOneHP.Enable();
+        FixRunScaling.Enable();
 
         LegacyResourcesDetours.Enable();
         LegacyShaderDetours.Enable();
@@ -95,6 +97,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
         LegacyShaderDetours.Disable();
         LegacyResourcesDetours.Disable();
 
+        FixRunScaling.Disable();
         FixNonLethalOneHP.Disable();
         FixExposeLog.Disable();
         FixNullEntitlement.Disable();
@@ -118,6 +121,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
         LegacyShaderDetours.Destroy();
         LegacyResourcesDetours.Destroy();
 
+        FixRunScaling.Destroy();
         FixNonLethalOneHP.Destroy();
         FixExposeLog.Destroy();
         FixNullEntitlement.Destroy();
