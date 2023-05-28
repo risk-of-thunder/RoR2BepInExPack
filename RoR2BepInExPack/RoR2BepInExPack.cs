@@ -59,6 +59,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
         FixExposeLog.Init();
         FixNonLethalOneHP.Init();
         FixRunScaling.Init();
+        FixCharacterBodyRemoveOldestTimedBuff.Init();
 
         LegacyResourcesDetours.Init();
         LegacyShaderDetours.Init();
@@ -83,6 +84,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
         FixExposeLog.Enable();
         FixNonLethalOneHP.Enable();
         FixRunScaling.Enable();
+        FixCharacterBodyRemoveOldestTimedBuff.Enable();
 
         LegacyResourcesDetours.Enable();
         LegacyShaderDetours.Enable();
@@ -97,6 +99,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
         LegacyShaderDetours.Disable();
         LegacyResourcesDetours.Disable();
 
+        FixCharacterBodyRemoveOldestTimedBuff.Disable();
         FixRunScaling.Disable();
         FixNonLethalOneHP.Disable();
         FixExposeLog.Disable();
@@ -121,6 +124,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
         LegacyShaderDetours.Destroy();
         LegacyResourcesDetours.Destroy();
 
+        FixCharacterBodyRemoveOldestTimedBuff.Destroy();
         FixRunScaling.Destroy();
         FixNonLethalOneHP.Destroy();
         FixExposeLog.Destroy();
