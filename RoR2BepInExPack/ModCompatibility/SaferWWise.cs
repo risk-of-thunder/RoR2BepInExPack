@@ -17,6 +17,13 @@ internal class SaferWWise
 
     internal static void Init()
     {
+        // Ideally this should check in the current process if the wwise native dll module is loaded
+        var isWwiseNativeDllLoaded = !Application.isBatchMode;
+        if (isWwiseNativeDllLoaded)
+        {
+            return;
+        }
+
         foreach (var akSoundEngineMethod in
             typeof(AkSoundEngine).GetMethods(BindingFlags.Public | BindingFlags.Static).
             Where(m => m.ReturnParameter.ParameterType == typeof(AKRESULT)))
