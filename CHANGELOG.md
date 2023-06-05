@@ -1,3 +1,7 @@
+-   **1.10.0**
+
+    -   Make ResourceAvailable safer.
+
 -   **1.9.0**
 
     -   For mod developers: Fix `CharacteracterBody.RemoveOldestTimedBuff` which didn't work if the oldest buff had index 0 in the `body.timedBuffs` array.
