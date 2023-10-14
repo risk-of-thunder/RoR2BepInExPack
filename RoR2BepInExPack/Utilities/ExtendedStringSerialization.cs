@@ -216,15 +216,19 @@ internal static class ExtendedStringSerialization
             serializer = (obj) =>
             {
                 BoundsInt bounds = (BoundsInt)obj;
-                return $"{bounds.center.x.ToString(Invariant)} {bounds.center.y.ToString(Invariant)} {bounds.center.z.ToString(Invariant)} " +
+                return $"{bounds.position.x.ToString(Invariant)} {bounds.position.y.ToString(Invariant)} {bounds.position.z.ToString(Invariant)} " +
                 $"{bounds.size.x.ToString(Invariant)} {bounds.size.y.ToString(Invariant)} {bounds.size.z.ToString(Invariant)}";
             },
             deserializer = (str) =>
             {
                 string[] components = SplitToComponents(str, typeof(BoundsInt), 6);
-                Vector3Int center = new Vector3Int(int.Parse(components[0], Invariant), int.Parse(components[1], Invariant), int.Parse(components[2], Invariant));
+                Vector3Int position = new Vector3Int(int.Parse(components[0], Invariant), int.Parse(components[1], Invariant), int.Parse(components[2], Invariant));
                 Vector3Int size = new Vector3Int(int.Parse(components[3], Invariant), int.Parse(components[4], Invariant), int.Parse(components[5], Invariant));
-                return new BoundsInt(center, size);
+                return new BoundsInt
+                {
+                    position = position,
+                    size = size,
+                };
             }
         });
 
