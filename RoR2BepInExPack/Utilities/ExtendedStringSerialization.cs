@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using MonoMod.RuntimeDetour;
@@ -224,7 +224,7 @@ internal static class ExtendedStringSerialization
                 string[] components = SplitToComponents(str, typeof(BoundsInt), 6);
                 Vector3Int center = new Vector3Int(int.Parse(components[0], Invariant), int.Parse(components[1], Invariant), int.Parse(components[2], Invariant));
                 Vector3Int size = new Vector3Int(int.Parse(components[3], Invariant), int.Parse(components[4], Invariant), int.Parse(components[5], Invariant));
-                return new Bounds(center, size);
+                return new BoundsInt(center, size);
             }
         });
 
