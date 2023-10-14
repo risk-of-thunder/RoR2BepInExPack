@@ -4,6 +4,7 @@ using RoR2BepInExPack.LegacyAssetSystem;
 using RoR2BepInExPack.VanillaFixes;
 using RoR2BepInExPack.ModCompatibility;
 using RoR2BepInExPack.ReflectionHooks;
+using RoR2BepInExPack.Utilities;
 
 namespace RoR2BepInExPack;
 
@@ -12,7 +13,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
 {
     public const string PluginGUID = "___riskofthunder" + "." + PluginName;
     public const string PluginName = "RoR2BepInExPack";
-    public const string PluginVersion = "1.10.0";
+    public const string PluginVersion = "1.11.0";
 
     private void Awake()
     {
@@ -66,6 +67,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
         LegacyShaderDetours.Init();
 
         FixMultiCorrupt.Init(Config);
+        ExtendedStringSerialization.Init();
     }
 
     private static void EnableHooks()
@@ -92,10 +94,12 @@ public class RoR2BepInExPack : BaseUnityPlugin
         LegacyShaderDetours.Enable();
 
         FixMultiCorrupt.Enable();
+        ExtendedStringSerialization.Enable();
     }
 
     private static void DisableHooks()
     {
+        ExtendedStringSerialization.Disable();
         FixMultiCorrupt.Disable();
 
         LegacyShaderDetours.Disable();
@@ -122,6 +126,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
 
     private static void DestroyHooks()
     {
+        ExtendedStringSerialization.Destroy();
         FixMultiCorrupt.Destroy();
 
         LegacyShaderDetours.Destroy();

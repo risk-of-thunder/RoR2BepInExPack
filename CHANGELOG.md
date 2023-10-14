@@ -1,3 +1,7 @@
+-   **1.11.0**
+
+    - For mod developers: Added extra serialization methods to ``HG.GeneralSerializer.StringSerializer``
+
 -   **1.10.0**
 
     -   Make ResourceAvailable safer.
