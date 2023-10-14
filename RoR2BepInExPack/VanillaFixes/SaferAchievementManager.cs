@@ -19,6 +19,24 @@ public class SaferAchievementManager
     private static Hook _hook;
     private static FieldInfo _achievementManagerOnAchievementsRegisteredFieldInfo;
 
+    /// <summary>
+    /// Called for each type that implement <see cref="BaseAchievement"/>,
+    /// the code tries to find a <see cref="RegisterAchievementAttribute"/> on the type definition
+    /// and the event is invoked with the POTENTIALLY NULL <see cref="RegisterAchievementAttribute"/>,
+    /// the <see cref="Type"/> is also provided to the event for the subscriber to inspect.
+    /// The use case for this event is mostly for mod creators to run their own logic for determining if the <see cref="RegisterAchievementAttribute"/>
+    /// should be ultimately used for creating an Achievement.
+    /// </summary>
+    public static event Func<Type, RegisterAchievementAttribute, RegisterAchievementAttribute> OnRegisterAchievementAttributeFound;
+
+    /// <summary>
+    /// Called once all <see cref="AchievementDef"/> have been created
+    /// by the code that iterates over all types that implemented <see cref="BaseAchievement"/>
+    /// and <see cref="RegisterAchievementAttribute"/>.
+    /// You can add or remove <see cref="AchievementDef"/> with this event.
+    /// The use case for this event is mostly for mod creators to run their own code
+    /// for adding or removing <see cref="AchievementDef"/> to the game.
+    /// </summary>
     public static event Action<List<string>, Dictionary<string, AchievementDef>, List<AchievementDef>> OnCollectAchievementDefs;
 
     internal static void Init()
@@ -50,6 +68,7 @@ public class SaferAchievementManager
     }
 
     // this is the original method 1:1 except GetTypes and GetCustomAttributes is safely wrapped
+    // additional events are added for mod creators
     // orig is not called
     private static void SaferCollectAchievementDefs(Action<Dictionary<string, AchievementDef>> _, Dictionary<string, AchievementDef> achievementIdentifierToDef)
     {
@@ -82,6 +101,11 @@ public class SaferAchievementManager
                 try
                 {
                     registerAchievementAttribute = (RegisterAchievementAttribute)type.GetCustomAttributes(false).FirstOrDefault((object v) => v is RegisterAchievementAttribute);
+
+                    if (OnRegisterAchievementAttributeFound != null)
+                    {
+                        registerAchievementAttribute = OnRegisterAchievementAttributeFound.Invoke(type, registerAchievementAttribute);
+                    }
                 }
                 catch (Exception ex)
                 {

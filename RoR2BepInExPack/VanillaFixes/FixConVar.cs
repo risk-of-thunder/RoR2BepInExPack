@@ -1,9 +1,15 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
+using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using MonoMod.RuntimeDetour;
+using RoR2;
+using RoR2.ConVar;
 using RoR2BepInExPack.Reflection;
+using UnityEngine;
 
 namespace RoR2BepInExPack.VanillaFixes;
 
@@ -40,19 +46,12 @@ internal static class FixConVar
     private static void ScanAllAssemblies(ILContext il)
     {
         ILCursor c = new ILCursor(il);
-        bool ilFound = c.TryGotoNext(MoveType.After, x => x.MatchLdtoken(out _),
-            x => x.MatchCallOrCallvirt<Type>(nameof(Type.GetTypeFromHandle)),
-            x => x.MatchCallOrCallvirt<Type>("get_" + nameof(Assembly)),
-            x => x.MatchCallOrCallvirt<Assembly>(nameof(Assembly.GetTypes)));
 
-        if (ilFound)
-        {
-            c.EmitDelegate(LoadAllConVars);
-        }
-        else
-        {
-            Log.Error("FixConVar TryGotoNext failed, not applying patch");
-        }
+        c.Emit(OpCodes.Ldarg_0);
+
+        c.EmitDelegate(LoadAllConVars);
+
+        c.Emit(OpCodes.Ret);
     }
 
     private static bool IsMonoFriendlyType(this Type type)
@@ -68,11 +67,108 @@ internal static class FixConVar
         return true;
     }
 
-    private static Type[] LoadAllConVars(Type[] dontCareTypes)
+    private static void LoadAllConVars(RoR2.Console self)
     {
-        return AppDomain.CurrentDomain.GetAssemblies().
-            Where(ass => ass.GetCustomAttribute<HG.Reflection.SearchableAttribute.OptInAttribute>() != null).
-            SelectMany(ass => ass.GetTypes().Where(t => t.IsMonoFriendlyType())).
-            ToArray();
+        self.allConVars = new();
+        self.archiveConVars = new();
+
+        var assTypes = new List<Type>();
+
+        foreach (var ass in AppDomain.CurrentDomain.GetAssemblies())
+        {
+            try
+            {
+                if (ass.GetCustomAttribute<HG.Reflection.SearchableAttribute.OptInAttribute>() != null)
+                {
+                    assTypes.AddRange(ass.GetTypes().Where(t => t.IsMonoFriendlyType()));
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Debug(e);
+            }
+        }
+
+        foreach (var type in assTypes)
+        {
+            try
+            {
+                foreach (var fieldInfo in type.GetFields(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic))
+                {
+                    try
+                    {
+                        if (fieldInfo.FieldType.IsSubclassOf(typeof(BaseConVar)))
+                        {
+                            if (fieldInfo.IsStatic)
+                            {
+                                BaseConVar conVar = (BaseConVar)fieldInfo.GetValue(null);
+                                self.RegisterConVarInternal(conVar);
+                            }
+                            else if (type.GetCustomAttribute<CompilerGeneratedAttribute>() == null)
+                            {
+                                Debug.LogError($"ConVar defined as {type.Name}.{fieldInfo.Name} could not be registered. ConVars must be static fields.");
+                            }
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Debug(e);
+                    }
+                }
+
+                foreach (var methodInfo in type.GetMethods(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic))
+                {
+                    try
+                    {
+                        if (methodInfo.GetCustomAttribute<ConVarProviderAttribute>() != null)
+                        {
+                            if (methodInfo.ReturnType != typeof(IEnumerable<BaseConVar>) ||
+                                methodInfo.GetParameters().Length != 0)
+                            {
+                                Debug.LogError("ConVar provider {type.Name}.{methodInfo.Name} does not match the signature \"static IEnumerable<ConVar.BaseConVar>()\".");
+                            }
+                            else if (!methodInfo.IsStatic)
+                            {
+                                Debug.LogError($"ConVar provider {type.Name}.{methodInfo.Name} could not be invoked. Methods marked with the ConVarProvider attribute must be static.");
+                            }
+                            else
+                            {
+                                foreach (var convar in (IEnumerable<BaseConVar>)methodInfo.Invoke(null, Array.Empty<object>()))
+                                {
+                                    self.RegisterConVarInternal(convar);
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Debug(e);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Debug(e);
+            }
+        }
+
+        foreach (var value in self.allConVars.Values)
+        {
+            try
+            {
+                if ((value.flags & ConVarFlags.Engine) != ConVarFlags.None)
+                {
+                    value.defaultValue = value.GetString();
+                }
+                else if (value.defaultValue != null)
+                {
+                    value.AttemptSetString(value.defaultValue);
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Error(e);
+            }
+        }
     }
 }
