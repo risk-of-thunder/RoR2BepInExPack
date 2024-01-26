@@ -52,16 +52,16 @@ internal class FixDedicatedServerMaxPlayerCount
     }
 
 #pragma warning disable CS0618 // Type or member is obsolete
-    private static NetworkClient FixUsageOfMaxPlayerCountVariable(Func<ConnectionConfig, int, NetworkClient> orig, ConnectionConfig config, int maxConnections)
+    private static NetworkClient FixUsageOfMaxPlayerCountVariable(Func<NetworkManager, ConnectionConfig, int, NetworkClient> orig, NetworkManager self, ConnectionConfig config, int maxConnections)
 #pragma warning restore CS0618 // Type or member is obsolete
     {
-        return orig(config, NetworkManagerSystem.SvMaxPlayersConVar.instance.intValue);
+        return orig(self, config, NetworkManagerSystem.SvMaxPlayersConVar.instance.intValue);
     }
 
 #pragma warning disable CS0618 // Type or member is obsolete
-    private static bool FixUsageOfMaxPlayerCountVariable2(Func<ConnectionConfig, int, bool> orig, ConnectionConfig config, int maxConnections)
+    private static bool FixUsageOfMaxPlayerCountVariable2(Func<NetworkManager, ConnectionConfig, int, bool> orig, NetworkManager self, ConnectionConfig config, int maxConnections)
 #pragma warning restore CS0618 // Type or member is obsolete
     {
-        return orig(config, NetworkManagerSystem.SvMaxPlayersConVar.instance.intValue);
+        return orig(self, config, NetworkManagerSystem.SvMaxPlayersConVar.instance.intValue);
     }
 }
