@@ -1,3 +1,7 @@
+-   **1.11.0**
+
+    -   Fix dedicated servers with more than 4 max players not working.
+
 -   **1.10.0**
 
     -   Make ResourceAvailable safer.
