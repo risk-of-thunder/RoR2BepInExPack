@@ -1,3 +1,7 @@
+-   **1.12.0**
+
+    -   Make frankenmono actually print stack overflow exception to the console instead of just closing.
+
 -   **1.11.0**
 
     -   Fix dedicated servers with more than 4 max players not working.

@@ -24,7 +24,9 @@ internal class SaferResourceAvailability
                         hookConfig
                     );
 
-        _onAvailableBackingFieldInfo = typeof(ResourceAvailability).GetField(nameof(ResourceAvailability.onAvailable), BindingFlags.Instance | BindingFlags.NonPublic);
+        // TODO: 'ResourceAvailability.onAvailable' is inaccessible due to its protection level
+        //_onAvailableBackingFieldInfo = typeof(ResourceAvailability).GetField(nameof(ResourceAvailability.onAvailable), BindingFlags.Instance | BindingFlags.NonPublic);
+        _onAvailableBackingFieldInfo = typeof(ResourceAvailability).GetField("onAvailable", BindingFlags.Instance | BindingFlags.NonPublic);
     }
 
     internal static void Enable()

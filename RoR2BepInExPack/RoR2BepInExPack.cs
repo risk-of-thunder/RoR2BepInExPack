@@ -1,8 +1,10 @@
+using System;
 using BepInEx;
 using RoR2;
 using RoR2BepInExPack.LegacyAssetSystem;
 using RoR2BepInExPack.ModCompatibility;
 using RoR2BepInExPack.ReflectionHooks;
+using RoR2BepInExPack.UnityEngineHooks;
 using RoR2BepInExPack.VanillaFixes;
 
 namespace RoR2BepInExPack;
@@ -12,7 +14,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
 {
     public const string PluginGUID = "___riskofthunder" + "." + PluginName;
     public const string PluginName = "RoR2BepInExPack";
-    public const string PluginVersion = "1.11.0";
+    public const string PluginVersion = "1.12.0";
 
     private void Awake()
     {
@@ -21,6 +23,8 @@ public class RoR2BepInExPack : BaseUnityPlugin
         RoR2Application.isModded = true;
 
         HookWatcher.Init();
+
+        FrankenMonoPrintStackOverflowException.Init(Info);
 
         InitHooks();
     }
