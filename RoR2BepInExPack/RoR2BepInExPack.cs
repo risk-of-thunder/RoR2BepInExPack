@@ -14,7 +14,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
 {
     public const string PluginGUID = "___riskofthunder" + "." + PluginName;
     public const string PluginName = "RoR2BepInExPack";
-    public const string PluginVersion = "1.12.0";
+    public const string PluginVersion = "1.13.0";
 
     private void Awake()
     {
@@ -24,7 +24,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
 
         HookWatcher.Init();
 
-        FrankenMonoPrintStackOverflowException.Init(Info);
+        FrankenMonoPrintStackOverflowException.Init();
 
         InitHooks();
     }
