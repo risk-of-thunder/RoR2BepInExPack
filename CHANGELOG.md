@@ -1,3 +1,7 @@
+-   **1.13.0**
+
+    -   Better fix for stack overflow exception that does not require a native dll.
+
 -   **1.12.0**
 
     -   Make frankenmono actually print stack overflow exception to the console instead of just closing.
