@@ -14,7 +14,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
 {
     public const string PluginGUID = "___riskofthunder" + "." + PluginName;
     public const string PluginName = "RoR2BepInExPack";
-    public const string PluginVersion = "1.13.0";
+    public const string PluginVersion = "1.14.0";
 
     private void Awake()
     {
@@ -66,6 +66,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
         FixRunScaling.Init();
         FixCharacterBodyRemoveOldestTimedBuff.Init();
         FixDedicatedServerMaxPlayerCount.Init();
+        FixHasEffectiveAuthority.Init();
 
         LegacyResourcesDetours.Init();
         LegacyShaderDetours.Init();
@@ -93,6 +94,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
         FixRunScaling.Enable();
         FixCharacterBodyRemoveOldestTimedBuff.Enable();
         FixDedicatedServerMaxPlayerCount.Enable();
+        FixHasEffectiveAuthority.Enable();
 
         LegacyResourcesDetours.Enable();
         LegacyShaderDetours.Enable();
@@ -107,6 +109,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
         LegacyShaderDetours.Disable();
         LegacyResourcesDetours.Disable();
 
+        FixHasEffectiveAuthority.Disable();
         FixDedicatedServerMaxPlayerCount.Disable();
         FixCharacterBodyRemoveOldestTimedBuff.Disable();
         FixRunScaling.Disable();
@@ -134,6 +137,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
         LegacyShaderDetours.Destroy();
         LegacyResourcesDetours.Destroy();
 
+        FixHasEffectiveAuthority.Destroy();
         FixDedicatedServerMaxPlayerCount.Destroy();
         FixCharacterBodyRemoveOldestTimedBuff.Destroy();
         FixRunScaling.Destroy();
