@@ -1,3 +1,7 @@
+-   **1.14.0**
+
+    -   Fix HasEffectiveAuthority for host players.
+
 -   **1.13.0**
 
     -   Better fix for stack overflow exception that does not require a native dll.
