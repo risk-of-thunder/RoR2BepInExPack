@@ -38,6 +38,7 @@ internal unsafe static class FrankenMonoPrintStackOverflowException
 
         // now we test
 #if DEBUG
+        /*
         try
         {
             Recurse();
@@ -46,6 +47,7 @@ internal unsafe static class FrankenMonoPrintStackOverflowException
         {
             Log.Info("SOE fix applied");
         }
+        */
 #endif
     }
 
