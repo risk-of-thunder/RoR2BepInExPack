@@ -1,3 +1,7 @@
+-   **1.15.0**
+
+    -   Fix a crash when exiting the game with some mods.
+
 -   **1.14.0**
 
     -   Fix HasEffectiveAuthority for host players.

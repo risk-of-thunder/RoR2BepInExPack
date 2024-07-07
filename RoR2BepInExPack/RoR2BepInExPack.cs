@@ -1,4 +1,6 @@
 using System;
+using System.Diagnostics;
+using System.Linq;
 using BepInEx;
 using RoR2;
 using RoR2BepInExPack.LegacyAssetSystem;
@@ -6,6 +8,7 @@ using RoR2BepInExPack.ModCompatibility;
 using RoR2BepInExPack.ReflectionHooks;
 using RoR2BepInExPack.UnityEngineHooks;
 using RoR2BepInExPack.VanillaFixes;
+using UnityEngine;
 
 namespace RoR2BepInExPack;
 
@@ -14,7 +17,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
 {
     public const string PluginGUID = "___riskofthunder" + "." + PluginName;
     public const string PluginName = "RoR2BepInExPack";
-    public const string PluginVersion = "1.14.0";
+    public const string PluginVersion = "1.15.0";
 
     private void Awake()
     {
@@ -27,6 +30,8 @@ public class RoR2BepInExPack : BaseUnityPlugin
         FrankenMonoPrintStackOverflowException.Init();
 
         InitHooks();
+
+        InitNativeHooks();
     }
 
     private void OnEnable()
@@ -156,5 +161,24 @@ public class RoR2BepInExPack : BaseUnityPlugin
         SaferAchievementManager.Destroy();
         AutoCatchReflectionTypeLoadException.Destroy();
         ILLine.Destroy();
+    }
+
+    private void InitNativeHooks()
+    {
+        var proc = Process.GetCurrentProcess().Modules
+            .Cast<ProcessModule>()
+            .FirstOrDefault(IsUnityPlayer) ?? Process.GetCurrentProcess().MainModule;
+        var baseAddress = proc.BaseAddress;
+
+        Application.quitting += () =>
+        {
+            PreDestroyRecursiveNullCheck.Init(baseAddress);
+            DestroyGameObjectRecursiveNullCheck.Init(baseAddress);
+        };
+
+        static bool IsUnityPlayer(ProcessModule p)
+        {
+            return p.ModuleName.ToLowerInvariant().Contains("unityplayer");
+        }
     }
 }
