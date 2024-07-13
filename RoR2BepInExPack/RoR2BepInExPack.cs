@@ -17,7 +17,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
 {
     public const string PluginGUID = "___riskofthunder" + "." + PluginName;
     public const string PluginName = "RoR2BepInExPack";
-    public const string PluginVersion = "1.15.0";
+    public const string PluginVersion = "1.16.0";
 
     private void Awake()
     {
@@ -31,7 +31,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
 
         InitHooks();
 
-        InitNativeHooks();
+        Application.quitting += OnApplicationQuitting;
     }
 
     private void OnEnable()
@@ -163,22 +163,27 @@ public class RoR2BepInExPack : BaseUnityPlugin
         ILLine.Destroy();
     }
 
-    private void InitNativeHooks()
+    private void OnApplicationQuitting()
     {
-        var proc = Process.GetCurrentProcess().Modules
-            .Cast<ProcessModule>()
-            .FirstOrDefault(IsUnityPlayer) ?? Process.GetCurrentProcess().MainModule;
-        var baseAddress = proc.BaseAddress;
-
-        Application.quitting += () =>
+        // Some mods add prefabs loaded from asset bundles directly as children
+        // to runtime prefabs instantiated with PrefabsAPI.InstantiateClone (or by similar means).
+        // And it seems like these prefabs are destroyed before runtime prefabs when the game is closing,
+        // which results in a harmless, but certainly annoying crash.
+        // Destroying all DontDestroyOnLoad objects before the game does seems to work out,
+        // but we have to use DestroyImmediate because at this point
+        // normal Destroy doesn't work
+        var tmp = new GameObject();
+        DontDestroyOnLoad(tmp);
+        foreach (var obj in tmp.scene.GetRootGameObjects())
         {
-            PreDestroyRecursiveNullCheck.Init(baseAddress);
-            DestroyGameObjectRecursiveNullCheck.Init(baseAddress);
-        };
-
-        static bool IsUnityPlayer(ProcessModule p)
-        {
-            return p.ModuleName.ToLowerInvariant().Contains("unityplayer");
+            try
+            {
+                DestroyImmediate(obj);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex);
+            }
         }
     }
 }
