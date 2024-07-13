@@ -1,3 +1,7 @@
+-   **1.16.0**
+
+    -   A better fix for a crash when exiting the game with some mods.
+
 -   **1.15.0**
 
     -   Fix a crash when exiting the game with some mods.
