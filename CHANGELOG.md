@@ -1,3 +1,8 @@
+-   **1.17.0**
+
+    -   Initial update for DLC 2 Release.
+	-   This package now also contains the Newtonsoft.Json.dll that have been removed this game update, just for back compat purposes.
+
 -   **1.16.0**
 
     -   A better fix for a crash when exiting the game with some mods.
