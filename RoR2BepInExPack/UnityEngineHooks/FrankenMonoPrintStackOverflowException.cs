@@ -13,6 +13,9 @@ internal unsafe static class FrankenMonoPrintStackOverflowException
 
     internal static void Init()
     {
+        //TODO: Update this for 2021 unity mono
+        return;
+
         var currentProcess = Process.GetCurrentProcess();
 
         var baseAddress = currentProcess

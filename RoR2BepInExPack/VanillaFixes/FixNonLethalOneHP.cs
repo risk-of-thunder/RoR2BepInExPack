@@ -22,7 +22,7 @@ internal class FixNonLethalOneHP
     {
         var ilHookConfig = new ILHookConfig() { ManualApply = true };
         _ilHook = new ILHook(
-                    typeof(HealthComponent).GetMethod(nameof(HealthComponent.TakeDamage),ReflectionHelper.AllFlags),
+                    typeof(HealthComponent).GetMethod(nameof(HealthComponent.TakeDamageProcess), ReflectionHelper.AllFlags),
                     FixLethality,
                     ref ilHookConfig
                 );
@@ -46,8 +46,8 @@ internal class FixNonLethalOneHP
     private static void FixLethality(ILContext il)
     {
         ILCursor c = new ILCursor(il);
-        bool ILFound = c.TryGotoNext( MoveType.After,
-                x => x.MatchLdfld(typeof(HealthComponent).GetField(nameof(HealthComponent.health),ReflectionHelper.AllFlags)),
+        bool ILFound = c.TryGotoNext(MoveType.After,
+                x => x.MatchLdfld(typeof(HealthComponent).GetField(nameof(HealthComponent.health), ReflectionHelper.AllFlags)),
                 x => x.MatchLdcR4(1),
                 x => x.MatchBltUn(out _));
 
@@ -55,7 +55,7 @@ internal class FixNonLethalOneHP
         {
             c.Index--;
             c.Emit(OpCodes.Ldarg_0);
-            c.EmitDelegate<Func<float,HealthComponent,float>>((targetHealth,self) => (self.health > 0f) ? 0f : targetHealth); 
+            c.EmitDelegate<Func<float, HealthComponent, float>>((targetHealth, self) => (self.health > 0f) ? 0f : targetHealth);
         }
         else
         {

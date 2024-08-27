@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -70,7 +71,7 @@ public class SaferAchievementManager
     // this is the original method 1:1 except GetTypes and GetCustomAttributes is safely wrapped
     // additional events are added for mod creators
     // orig is not called
-    private static void SaferCollectAchievementDefs(Action<Dictionary<string, AchievementDef>> _, Dictionary<string, AchievementDef> achievementIdentifierToDef)
+    private static IEnumerator SaferCollectAchievementDefs(Dictionary<string, AchievementDef> achievementIdentifierToDef)
     {
         var achievementDefs = new List<AchievementDef>();
         achievementIdentifierToDef.Clear();
@@ -135,7 +136,8 @@ public class SaferAchievementManager
                             nameToken = "ACHIEVEMENT_" + registerAchievementAttribute.identifier.ToUpper(CultureInfo.InvariantCulture) + "_NAME",
                             descriptionToken = "ACHIEVEMENT_" + registerAchievementAttribute.identifier.ToUpper(CultureInfo.InvariantCulture) + "_DESCRIPTION",
                             type = type,
-                            serverTrackerType = registerAchievementAttribute.serverTrackerType
+                            serverTrackerType = registerAchievementAttribute.serverTrackerType,
+                            lunarCoinReward = registerAchievementAttribute.lunarCoinReward
                         };
 
                         if (unlockableDef && unlockableDef.achievementIcon)
@@ -145,6 +147,7 @@ public class SaferAchievementManager
                         else
                         {
                             achievementDef.iconPath = "Textures/AchievementIcons/tex" + registerAchievementAttribute.identifier + "Icon";
+                            achievementDef.PreloadIcon();
                         }
 
                         AchievementManager.achievementIdentifiers.Add(registerAchievementAttribute.identifier);
@@ -168,6 +171,8 @@ public class SaferAchievementManager
                         }
                     }
                 }
+
+                yield return null;
             }
         }
 
@@ -207,5 +212,8 @@ public class SaferAchievementManager
 
         var onAchievementsRegistered = (Action)_achievementManagerOnAchievementsRegisteredFieldInfo.GetValue(null);
         onAchievementsRegistered?.Invoke();
+
+        yield return null;
+        yield break;
     }
 }

@@ -22,7 +22,7 @@ internal class FixExposeLog
     {
         var ilHookConfig = new ILHookConfig() { ManualApply = true };
         _ilHook = new ILHook(
-                    typeof(HealthComponent).GetMethod(nameof(HealthComponent.TakeDamage),ReflectionHelper.AllFlags),
+                    typeof(HealthComponent).GetMethod(nameof(HealthComponent.TakeDamageProcess), ReflectionHelper.AllFlags),
                     FixAddingExpose,
                     ref ilHookConfig
                 );
@@ -51,14 +51,14 @@ internal class FixExposeLog
                 x => x.MatchLdarg(0),
                 x => x.MatchLdfld(out _),
                 x => x.MatchLdsfld(typeof(Buffs).GetField(nameof(Buffs.MercExpose))),
-                x => x.MatchCallOrCallvirt(typeof(CharacterBody).GetMethod("AddBuff",new Type[]{typeof(BuffDef)})));
+                x => x.MatchCallOrCallvirt(typeof(CharacterBody).GetMethod("AddBuff", new Type[] { typeof(BuffDef) })));
         c.MarkLabel(skipLabel);
         ILFound &= c.TryGotoPrev(
                 x => x.MatchLdstr("Adding expose"));
 
         if (ILFound)
         {
-            c.Emit(OpCodes.Br,skipLabel);
+            c.Emit(OpCodes.Br, skipLabel);
         }
         else
         {
