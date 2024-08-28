@@ -13,9 +13,6 @@ internal unsafe static class FrankenMonoPrintStackOverflowException
 
     internal static void Init()
     {
-        //TODO: Update this for 2021 unity mono
-        return;
-
         var currentProcess = Process.GetCurrentProcess();
 
         var baseAddress = currentProcess
@@ -25,7 +22,7 @@ internal unsafe static class FrankenMonoPrintStackOverflowException
             .BaseAddress;
 
         // hardcoded offset found with a bit of RE to https://github.com/Unity-Technologies/mono/blob/unity-2019.4-mbe/mono/mini/exceptions-amd64.c#L52
-        var restoreStackFunc = *(byte**)(baseAddress + 0x49ee60);
+        var restoreStackFunc = *(byte**)(baseAddress + 0x757488);
 
         // making sure we're in the right place by checking the first few instructions
         if (*(ulong*)restoreStackFunc != 0x20_ec_83_48_ec_8b_48_55)
@@ -41,7 +38,6 @@ internal unsafe static class FrankenMonoPrintStackOverflowException
 
         // now we test
 #if DEBUG
-        /*
         try
         {
             Recurse();
@@ -50,7 +46,6 @@ internal unsafe static class FrankenMonoPrintStackOverflowException
         {
             Log.Info("SOE fix applied");
         }
-        */
 #endif
     }
 
