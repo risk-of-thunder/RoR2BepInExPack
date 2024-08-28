@@ -72,6 +72,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
         FixCharacterBodyRemoveOldestTimedBuff.Init();
         FixDedicatedServerMaxPlayerCount.Init();
         FixHasEffectiveAuthority.Init();
+        FixSystemInitializer.Init();
 
         LegacyResourcesDetours.Init();
         LegacyShaderDetours.Init();
