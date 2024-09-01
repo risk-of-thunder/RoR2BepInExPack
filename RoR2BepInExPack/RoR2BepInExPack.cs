@@ -15,7 +15,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
 {
     public const string PluginGUID = "___riskofthunder" + "." + PluginName;
     public const string PluginName = "RoR2BepInExPack";
-    public const string PluginVersion = "1.19.0";
+    public const string PluginVersion = "1.20.0";
 
     private void Awake()
     {
@@ -70,6 +70,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
         FixDedicatedServerMaxPlayerCount.Init();
         FixHasEffectiveAuthority.Init();
         FixSystemInitializer.Init();
+        FixFrameRateDependantLogic.Init(Config);
 
         LegacyResourcesDetours.Init();
         LegacyShaderDetours.Init();

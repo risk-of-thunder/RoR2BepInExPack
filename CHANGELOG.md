@@ -1,3 +1,16 @@
+-   **1.20.0**
+
+    -   Add an optional fix that attempts to revert the changes made by Gearbox, which made most of the game's logic dependent on frame rate. To activate the fix, you need to run the game with this version at least once, exit the game and activate the new configuration option that is generated.
+
+-   **1.19.0**
+
+    -   Fix `SearchableAttribute` not working properly for assemblies other than `RoR2.dll`.
+
+-   **1.18.0**
+
+    -   Fix `SystemInitializerAttribute` not working for assemblies other than `RoR2.dll`.
+    -   `FrankenMonoPrintStackOverflowException` works again.
+
 -   **1.17.0**
 
     -   Initial update for DLC 2 Release.

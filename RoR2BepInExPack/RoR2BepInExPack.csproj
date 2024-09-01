@@ -21,4 +21,11 @@
 		<PackageReference Include="RiskOfRain2.GameLibs" Version="*-*" />
 	</ItemGroup>
 
+	<ItemGroup>
+		<PackageReference Include=" Krafs.Publicizer" Version="*" PrivateAssets="all" />
+
+		<!-- Publicize by assembly name -->
+		<Publicize Include="HGUnityUtils" />
+	</ItemGroup>
+
 </Project>
