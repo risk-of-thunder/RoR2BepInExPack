@@ -179,8 +179,6 @@ internal static class FixConVar
         {
             try
             {
-                Log.Error(value.name + " - " + value.defaultValue);
-
                 if ((value.flags & ConVarFlags.Engine) != ConVarFlags.None)
                 {
                     value.defaultValue = value.GetString();
