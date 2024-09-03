@@ -15,42 +15,55 @@ namespace RoR2BepInExPack.VanillaFixes;
 
 // Convars in vanilla only check for ConVars in the base RoR2 Assembly, which means ConVars cant be used
 // by other assemblies
-// Fix: Make it so all assemblies are scanned for ConVarss
+// Fix: Make it so all assemblies are scanned for ConVars
 internal static class FixConVar
 {
     private static ILHook _ilHook;
 
     internal static void Init()
     {
-        var ilHookConfig = new ILHookConfig { ManualApply = true };
-        _ilHook = new ILHook(
-            typeof(RoR2.Console).GetMethod(nameof(RoR2.Console.InitConVars), ReflectionHelper.AllFlags),
-            ScanAllAssemblies,
-            ref ilHookConfig);
+        try
+        {
+            var ilHookConfig = new ILHookConfig { ManualApply = true };
+
+            var moveNext = typeof(RoR2.Console).
+                    GetNestedTypes(ReflectionHelper.AllFlags).
+                    FirstOrDefault(t => t.Name.Contains(nameof(RoR2.Console.InitConVarsCoroutine))).
+                    GetMethods(ReflectionHelper.AllFlags).
+                    FirstOrDefault(m => m.Name.Contains("MoveNext"));
+
+            _ilHook = new ILHook(
+                moveNext,
+                ScanAllAssemblies,
+                ref ilHookConfig);
+        }
+        catch (Exception e)
+        {
+            Log.Error(e);
+        }
     }
     internal static void Enable()
     {
-        _ilHook.Apply();
+        _ilHook?.Apply();
     }
 
     internal static void Disable()
     {
-        _ilHook.Undo();
+        _ilHook?.Undo();
     }
 
     internal static void Destroy()
     {
-        _ilHook.Free();
+        _ilHook?.Free();
     }
 
     private static void ScanAllAssemblies(ILContext il)
     {
-        ILCursor c = new ILCursor(il);
-
-        c.Emit(OpCodes.Ldarg_0);
+        var c = new ILCursor(il);
 
         c.EmitDelegate(LoadAllConVars);
 
+        c.Emit(OpCodes.Ldc_I4_0);
         c.Emit(OpCodes.Ret);
     }
 
@@ -67,8 +80,10 @@ internal static class FixConVar
         return true;
     }
 
-    private static void LoadAllConVars(RoR2.Console self)
+    private static void LoadAllConVars()
     {
+        var self = RoR2.Console.instance;
+
         self.allConVars = new();
         self.archiveConVars = new();
 
@@ -93,7 +108,8 @@ internal static class FixConVar
         {
             try
             {
-                foreach (var fieldInfo in type.GetFields(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic))
+                foreach (var fieldInfo in type.GetFields(BindingFlags.Instance |
+                    BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic))
                 {
                     try
                     {
@@ -106,7 +122,8 @@ internal static class FixConVar
                             }
                             else if (type.GetCustomAttribute<CompilerGeneratedAttribute>() == null)
                             {
-                                Debug.LogError($"ConVar defined as {type.Name}.{fieldInfo.Name} could not be registered. ConVars must be static fields.");
+                                Debug.LogError($"ConVar defined as {type.Name}.{fieldInfo.Name} could not be registered. " +
+                                    $"ConVars must be static fields.");
                             }
                         }
                     }
@@ -116,7 +133,8 @@ internal static class FixConVar
                     }
                 }
 
-                foreach (var methodInfo in type.GetMethods(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic))
+                foreach (var methodInfo in type.GetMethods(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public |
+                    BindingFlags.NonPublic))
                 {
                     try
                     {
@@ -125,11 +143,13 @@ internal static class FixConVar
                             if (methodInfo.ReturnType != typeof(IEnumerable<BaseConVar>) ||
                                 methodInfo.GetParameters().Length != 0)
                             {
-                                Debug.LogError("ConVar provider {type.Name}.{methodInfo.Name} does not match the signature \"static IEnumerable<ConVar.BaseConVar>()\".");
+                                Debug.LogError("ConVar provider {type.Name}.{methodInfo.Name} does not match the signature " +
+                                    "\"static IEnumerable<ConVar.BaseConVar>()\".");
                             }
                             else if (!methodInfo.IsStatic)
                             {
-                                Debug.LogError($"ConVar provider {type.Name}.{methodInfo.Name} could not be invoked. Methods marked with the ConVarProvider attribute must be static.");
+                                Debug.LogError($"ConVar provider {type.Name}.{methodInfo.Name} could not be invoked. " +
+                                    $"Methods marked with the ConVarProvider attribute must be static.");
                             }
                             else
                             {
@@ -152,10 +172,15 @@ internal static class FixConVar
             }
         }
 
+        // Fix that stupid null exception when the audio manager parent volume convar are init.
+        AudioManager.cvVolumeMaster.fallbackString = AudioManager.cvVolumeMaster.GetString();
+
         foreach (var value in self.allConVars.Values)
         {
             try
             {
+                Log.Error(value.name + " - " + value.defaultValue);
+
                 if ((value.flags & ConVarFlags.Engine) != ConVarFlags.None)
                 {
                     value.defaultValue = value.GetString();
