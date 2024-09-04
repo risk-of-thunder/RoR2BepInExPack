@@ -1,3 +1,7 @@
+-   **1.22.0**
+
+    -   Continue the FixFrameRateDependantLogic experimentation. Better compat with mods hooking the same methods.
+
 -   **1.21.0**
 
     -   Fix ConVar not getting scanned since the SOTS DLC2 Release patch.
