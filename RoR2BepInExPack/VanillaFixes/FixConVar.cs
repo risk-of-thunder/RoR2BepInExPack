@@ -13,8 +13,8 @@ using UnityEngine;
 
 namespace RoR2BepInExPack.VanillaFixes;
 
-// Convars in vanilla only check for ConVars in the base RoR2 Assembly, which means ConVars cant be used
-// by other assemblies
+// Convars in vanilla only check for ConVars in the base RoR2 Assembly,
+// which means ConVars cant be used by other assemblies
 // Fix: Make it so all assemblies are scanned for ConVars
 internal static class FixConVar
 {
