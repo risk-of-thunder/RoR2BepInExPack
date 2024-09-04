@@ -1,3 +1,8 @@
+-   **1.21.0**
+
+    -   Fix ConVar not getting scanned since the SOTS DLC2 Release patch.
+    -   Continue the FixFrameRateDependantLogic experimentation. AI behaving weirdly should be fixed. Should also have better compat with mods that hooked HealthBar.Update and PlayerCharacterMasterController.Update methods.
+
 -   **1.20.0**
 
     -   Add an optional fix that attempts to revert the changes made by Gearbox, which made most of the game's logic dependent on frame rate. To activate the fix, you need to run the game with this version at least once, exit the game and activate the new configuration option that is generated.
