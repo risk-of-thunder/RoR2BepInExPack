@@ -1,3 +1,7 @@
+-   **1.24.0**
+
+    -   Remove the `FixFrameRateDependantLogic` fix as it's now fixed by the new game patch.
+
 -   **1.23.0**
 
     -   Re-add `SaferSearchableAttribute`.

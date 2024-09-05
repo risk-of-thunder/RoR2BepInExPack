@@ -4,8 +4,6 @@ using System.Reflection;
 using MonoMod.Cil;
 using MonoMod.RuntimeDetour;
 using MonoMod.RuntimeDetour.HookGen;
-using RoR2BepInExPack.Reflection;
-using RoR2BepInExPack.VanillaFixes;
 
 namespace RoR2BepInExPack;
 
@@ -160,54 +158,6 @@ internal static class HookWatcher
         }
 
         Log.Debug($"{hookInfo.Kind}Hook {GetToIdentifier()} {context} by assembly: {hookOwnerDllName} for: {fromIdentifier}");
-
-        if (FixFrameRateDependantLogic.IsFixedEnabled &&
-            RedirectFixFrameRateDependantLogicHooks &&
-            hookInfo.HookDelegate != null && hookInfo.HookDelegate is ILContext.Manipulator manipulator)
-        {
-            // Redirect hooks to the right methods.
-            // Not the right place for this or atleast it should be generalized but no time for this right now
-
-            RedirectFixFrameRateDependantLogicHooks = false;
-
-            try
-            {
-                void LogRedirection()
-                {
-                    Log.Info($"Redirecting {hookInfo.HookDelegate.Method?.DeclaringType?.FullName}.{hookInfo.HookDelegate.Method?.Name}" +
-                        $" IL Hook to {fromIdentifier} because the {nameof(FixFrameRateDependantLogic)} fix is enabled.");
-                }
-
-                if (fromIdentifier == $"RoR2.{nameof(RoR2.PlayerCharacterMasterController)}.Update")
-                {
-                    LogRedirection();
-
-                    new ILHook(
-                        typeof(FixFrameRateDependantLogic).
-                            GetMethod(nameof(FixFrameRateDependantLogic.PlayerCharacterMasterController_Update),
-                            ReflectionHelper.AllFlags),
-                        manipulator
-                    );
-                }
-                else if (fromIdentifier == $"RoR2.{nameof(RoR2.PlayerCharacterMasterController)}.FixedUpdate")
-                {
-                    LogRedirection();
-
-                    new ILHook(
-                        typeof(FixFrameRateDependantLogic).
-                            GetMethod(nameof(FixFrameRateDependantLogic.PlayerCharacterMasterController_FixedUpdate),
-                            ReflectionHelper.AllFlags),
-                        manipulator
-                    );
-                }
-            }
-            catch (Exception e)
-            {
-                Log.Warning(e);
-            }
-
-            RedirectFixFrameRateDependantLogicHooks = true;
-        }
 
         return true;
     }
