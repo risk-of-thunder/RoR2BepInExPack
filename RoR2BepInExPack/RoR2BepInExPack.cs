@@ -15,7 +15,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
 {
     public const string PluginGUID = "___riskofthunder" + "." + PluginName;
     public const string PluginName = "RoR2BepInExPack";
-    public const string PluginVersion = "1.22.0";
+    public const string PluginVersion = "1.23.0";
 
     private void Awake()
     {
@@ -55,6 +55,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
         AutoCatchReflectionTypeLoadException.Init();
         SaferAchievementManager.Init();
         SaferResourceAvailability.Init();
+        SaferSearchableAttribute.Init();
         FixConsoleLog.Init();
         FixConVar.Init();
         FixDeathAnimLog.Init();
@@ -84,6 +85,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
         AutoCatchReflectionTypeLoadException.Enable();
         SaferAchievementManager.Enable();
         SaferResourceAvailability.Enable();
+        SaferSearchableAttribute.Enable();
         FixConsoleLog.Enable();
         FixConVar.Enable();
         FixDeathAnimLog.Enable();
@@ -126,6 +128,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
         FixDeathAnimLog.Disable();
         FixConsoleLog.Disable();
         FixConVar.Disable();
+        SaferSearchableAttribute.Disable();
         SaferResourceAvailability.Disable();
         SaferAchievementManager.Disable();
         AutoCatchReflectionTypeLoadException.Disable();
@@ -153,6 +156,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
         FixDeathAnimLog.Destroy();
         FixConsoleLog.Destroy();
         FixConVar.Destroy();
+        SaferSearchableAttribute.Destroy();
         SaferResourceAvailability.Destroy();
         SaferAchievementManager.Destroy();
         AutoCatchReflectionTypeLoadException.Destroy();

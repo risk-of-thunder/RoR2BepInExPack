@@ -1,6 +1,6 @@
 {
   "name": "RoR2BepInExPack",
-  "version_number": "1.22.0",
+  "version_number": "1.23.0",
   "website_url": "https://github.com/risk-of-thunder/RoR2BepInExPack",
   "description": "Now comes with an optional fix that attempts to revert the changes made by Gearbox, which made most of the game's logic dependent on frame rate.",
   "dependencies": []

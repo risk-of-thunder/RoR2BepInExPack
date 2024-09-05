@@ -1,3 +1,7 @@
+-   **1.23.0**
+
+    -   Re-add `SaferSearchableAttribute`.
+
 -   **1.22.0**
 
     -   Continue the FixFrameRateDependantLogic experimentation. Better compat with mods hooking the same methods.
