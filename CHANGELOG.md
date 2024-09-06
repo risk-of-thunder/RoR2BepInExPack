@@ -1,3 +1,7 @@
+-   **1.24.1**
+
+    -   Fix `SaferSearchableAttribute` not working due to the game cctor firing before the hook has the chance to apply.
+
 -   **1.24.0**
 
     -   Remove the `FixFrameRateDependantLogic` fix as it's now fixed by the new game patch.

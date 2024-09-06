@@ -60,7 +60,7 @@ internal class SaferSearchableAttribute
     {
         try
         {
-            SearchableAttribute.Initialize();
+            typeof(SearchableAttribute).TypeInitializer.Invoke(null, null);
         }
         catch (Exception e)
         {
