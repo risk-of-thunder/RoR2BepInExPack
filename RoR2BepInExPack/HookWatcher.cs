@@ -1,15 +1,19 @@
 ﻿using System;
 using System.IO;
 using System.Reflection;
+using HarmonyLib;
 using MonoMod.Cil;
 using MonoMod.RuntimeDetour;
 using MonoMod.RuntimeDetour.HookGen;
+using RoR2BepInExPack.Reflection;
 
 namespace RoR2BepInExPack;
 
 internal static class HookWatcher
 {
     private static DetourModManager ModManager { get; set; }
+
+    private static Hook _harmonyWatcher;
 
     internal static void Init()
     {
@@ -24,10 +28,35 @@ internal static class HookWatcher
         HookEndpointManager.OnAdd += LogHookAdd;
         HookEndpointManager.OnModify += LogHookModify;
         HookEndpointManager.OnRemove += LogHookRemove;
+
+        _harmonyWatcher = new Hook(
+            typeof(PatchJobs<MethodInfo>.Job).GetMethod(nameof(PatchJobs<MethodInfo>.Job.AddPatch), ReflectionHelper.AllFlags),
+            HarmonyAddPatchWatcher, new HookConfig { ManualApply = true });
+        _harmonyWatcher.Apply();
+    }
+
+    private static void HarmonyAddPatchWatcher(Action<PatchJobs<MethodInfo>.Job, AttributePatch> orig,
+        PatchJobs<MethodInfo>.Job self, AttributePatch patch)
+    {
+        orig(self, patch);
+
+        try
+        {
+            var patchAss = patch.info.method.DeclaringType.Assembly;
+            var assemblyName = string.IsNullOrEmpty(patchAss.Location) ? patchAss.GetName().Name : Path.GetFileName(patchAss.Location);
+            Log.Debug($"Harmony {patch.type} {patch.info.method.FullDescription()} added by {assemblyName} for: {self.original.FullDescription()}");
+        }
+        catch (Exception e)
+        {
+            Log.Debug(e);
+        }
     }
 
     internal static void Destroy()
     {
+        _harmonyWatcher.Undo();
+        _harmonyWatcher.Free();
+
         HookEndpointManager.OnRemove -= LogHookRemove;
         HookEndpointManager.OnModify -= LogHookModify;
         HookEndpointManager.OnAdd -= LogHookAdd;

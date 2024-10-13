@@ -26,6 +26,9 @@
 
 		<!-- Publicize by assembly name -->
 		<Publicize Include="HGUnityUtils" />
+
+		<!-- Publicize by assembly name -->
+		<Publicize Include="0Harmony" />
 	</ItemGroup>
 
 </Project>
