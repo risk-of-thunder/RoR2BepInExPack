@@ -1,3 +1,7 @@
+-   **1.24.2**
+
+    -   Properly log harmony patches.
+
 -   **1.24.1**
 
     -   Fix `SaferSearchableAttribute` not working due to the game cctor firing before the hook has the chance to apply.
