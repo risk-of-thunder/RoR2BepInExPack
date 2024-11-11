@@ -1,3 +1,7 @@
+-   **1.25.0**
+
+    -   Fix lobby compatibility for DLC2 with additional difficulties.
+
 -   **1.24.2**
 
     -   Properly log harmony patches.
