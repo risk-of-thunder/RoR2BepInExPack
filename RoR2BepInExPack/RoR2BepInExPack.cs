@@ -71,6 +71,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
         FixDedicatedServerMaxPlayerCount.Init();
         FixHasEffectiveAuthority.Init();
         FixSystemInitializer.Init();
+        FixRuleBookViewerStrip.Init();
 
         LegacyResourcesDetours.Init();
         LegacyShaderDetours.Init();
@@ -99,6 +100,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
         FixCharacterBodyRemoveOldestTimedBuff.Enable();
         FixDedicatedServerMaxPlayerCount.Enable();
         FixHasEffectiveAuthority.Enable();
+        FixRuleBookViewerStrip.Enable();
 
         LegacyResourcesDetours.Enable();
         LegacyShaderDetours.Enable();
@@ -127,6 +129,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
         FixDeathAnimLog.Disable();
         FixConsoleLog.Disable();
         FixConVar.Disable();
+        FixRuleBookViewerStrip.Disable();
         SaferSearchableAttribute.Disable();
         SaferResourceAvailability.Disable();
         SaferAchievementManager.Disable();
@@ -155,6 +158,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
         FixDeathAnimLog.Destroy();
         FixConsoleLog.Destroy();
         FixConVar.Destroy();
+        FixRuleBookViewerStrip.Destroy();
         SaferSearchableAttribute.Destroy();
         SaferResourceAvailability.Destroy();
         SaferAchievementManager.Destroy();
