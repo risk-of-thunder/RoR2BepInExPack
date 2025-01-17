@@ -1,3 +1,7 @@
+-   **1.26.0**
+
+    -   Appends the exception to the error message of "Failed at InvokeHandler, probably malformed packet!", allowing for better and easier debugging.
+
 -   **1.25.0**
 
     -   Fix lobby compatibility for DLC2 with additional difficulties.
