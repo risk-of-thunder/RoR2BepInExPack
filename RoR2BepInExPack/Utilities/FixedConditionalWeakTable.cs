@@ -78,8 +78,17 @@ public class FixedConditionalWeakTable<TKey, TValue> : IDictionary<TKey, TValue>
     {
         get
         {
-            ForceShrink();
-            return valueByKey.Count;
+            int count = 0;
+
+            foreach (WeakReferenceWrapper<TKey> keyReference in valueByKey.Keys)
+            {
+                if (keyReference.weakReference.TryGetTarget(out _))
+                {
+                    count++;
+                }
+            }
+
+            return count;
         }
     }
 
@@ -186,11 +195,6 @@ public class FixedConditionalWeakTable<TKey, TValue> : IDictionary<TKey, TValue>
         value = (TValue)cachedConstructor.Invoke(Array.Empty<object>());
         Add(key, value);
         return value;
-    }
-
-    void ForceShrink()
-    {
-        ((FixedConditionalWeakTableManager.IShrinkable)this).Shrink();
     }
 
     void FixedConditionalWeakTableManager.IShrinkable.Shrink()
