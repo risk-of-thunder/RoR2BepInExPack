@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Reflection;
@@ -11,12 +12,90 @@ namespace RoR2BepInExPack.Utilities;
 /// </summary>
 /// <typeparam name="TKey"></typeparam>
 /// <typeparam name="TValue"></typeparam>
-public class FixedConditionalWeakTable<TKey, TValue> : FixedConditionalWeakTableManager.IShrinkable
+public class FixedConditionalWeakTable<TKey, TValue> : IDictionary<TKey, TValue>, IReadOnlyDictionary<TKey, TValue>, FixedConditionalWeakTableManager.IShrinkable
     where TKey : class
     where TValue : class
 {
     private ConstructorInfo cachedConstructor = null;
     private readonly ConcurrentDictionary<WeakReferenceWrapper<TKey>, TValue> valueByKey = new(new WeakReferenceWrapperComparer<TKey>());
+
+    /// <inheritdoc/>
+    public TValue this[TKey key]
+    {
+        get
+        {
+            return valueByKey[new WeakReferenceWrapper<TKey>(key, true)];
+        }
+        set
+        {
+            valueByKey[new WeakReferenceWrapper<TKey>(key, false)] = value;
+        }
+    }
+
+    /// <inheritdoc/>
+    public ICollection<TKey> Keys
+    {
+        get
+        {
+            List<TKey> keys = new List<TKey>(valueByKey.Count);
+            foreach (WeakReferenceWrapper<TKey> keyReference in valueByKey.Keys)
+            {
+                if (keyReference.weakReference.TryGetTarget(out TKey key))
+                {
+                    keys.Add(key);
+                }
+            }
+
+            return keys.AsReadOnly();
+        }
+    }
+
+    /// <inheritdoc/>
+    public ICollection<TValue> Values
+    {
+        get
+        {
+            List<TValue> values = new List<TValue>(valueByKey.Count);
+            foreach ((WeakReferenceWrapper<TKey> keyReference, TValue value) in valueByKey)
+            {
+                if (keyReference.weakReference.TryGetTarget(out _))
+                {
+                    values.Add(value);
+                }
+            }
+
+            return values.AsReadOnly();
+        }
+    }
+
+    /// <summary>
+    /// Gets the number of living key/value pairs contained in the <see cref="FixedConditionalWeakTable{TKey, TValue}"/>
+    /// </summary>
+    /// <remarks>
+    /// In order to return an accurate value, getting this value requires a re-count of the collection to determine which values are still alive in memory, use <see cref="SpeculativeCount"/> in order to avoid this re-count
+    /// </remarks>
+    public int Count
+    {
+        get
+        {
+            ForceShrink();
+            return valueByKey.Count;
+        }
+    }
+
+    /// <summary>
+    /// Gets the approximate number of key/value pairs contained in the <see cref="FixedConditionalWeakTable{TKey, TValue}"/>
+    /// </summary>
+    /// <remarks>
+    /// This value is always greater than or equal to the number of living elements in the table, depending on when the table was last re-counted.
+    /// </remarks>
+    public int SpeculativeCount => valueByKey.Count;
+
+    bool ICollection<KeyValuePair<TKey, TValue>>.IsReadOnly => false;
+
+    IEnumerable<TKey> IReadOnlyDictionary<TKey, TValue>.Keys => Keys;
+
+    IEnumerable<TValue> IReadOnlyDictionary<TKey, TValue>.Values => Values;
 
     public FixedConditionalWeakTable()
     {
@@ -109,6 +188,11 @@ public class FixedConditionalWeakTable<TKey, TValue> : FixedConditionalWeakTable
         return value;
     }
 
+    void ForceShrink()
+    {
+        ((FixedConditionalWeakTableManager.IShrinkable)this).Shrink();
+    }
+
     void FixedConditionalWeakTableManager.IShrinkable.Shrink()
     {
         foreach (var item in valueByKey)
@@ -119,6 +203,68 @@ public class FixedConditionalWeakTable<TKey, TValue> : FixedConditionalWeakTable
             }
         }
     }
+
+    /// <inheritdoc/>
+    public bool ContainsKey(TKey key)
+    {
+        return valueByKey.ContainsKey(new WeakReferenceWrapper<TKey>(key, true));
+    }
+
+    /// <inheritdoc/>
+    public void Clear()
+    {
+        valueByKey.Clear();
+    }
+
+    void ICollection<KeyValuePair<TKey, TValue>>.Add(KeyValuePair<TKey, TValue> kvp)
+    {
+        Add(kvp.Key, kvp.Value);
+    }
+
+    bool ICollection<KeyValuePair<TKey, TValue>>.Contains(KeyValuePair<TKey, TValue> kvp)
+    {
+        return TryGetValue(kvp.Key, out TValue value) && EqualityComparer<TValue>.Default.Equals(value, kvp.Value);
+    }
+
+    void ICollection<KeyValuePair<TKey, TValue>>.CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex)
+    {
+        if (array is null)
+            throw new ArgumentNullException(nameof(array));
+
+        if (arrayIndex < 0 || arrayIndex >= array.Length)
+            throw new ArgumentOutOfRangeException(nameof(arrayIndex), $"{nameof(arrayIndex)} is not a valid index in {nameof(array)}");
+
+        int count = Count;
+        if (arrayIndex + count > array.Length)
+            throw new ArgumentOutOfRangeException(nameof(array), "Destination array is not long enough to copy all the items in the collection.");
+
+        foreach ((WeakReferenceWrapper<TKey> keyReference, TValue value) in valueByKey)
+        {
+            if (keyReference.weakReference.TryGetTarget(out TKey key))
+            {
+                array[arrayIndex++] = new KeyValuePair<TKey, TValue>(key, value);
+            }
+        }
+    }
+
+    bool ICollection<KeyValuePair<TKey, TValue>>.Remove(KeyValuePair<TKey, TValue> kvp)
+    {
+        return TryGetValue(kvp.Key, out TValue value) && EqualityComparer<TValue>.Default.Equals(value, kvp.Value) && Remove(kvp.Key);
+    }
+
+    /// <inheritdoc/>
+    public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
+    {
+        foreach ((WeakReferenceWrapper<TKey> keyWrapper, TValue value) in valueByKey)
+        {
+            if (keyWrapper.weakReference.TryGetTarget(out TKey key))
+            {
+                yield return new KeyValuePair<TKey, TValue>(key, value);
+            }
+        }
+    }
+
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
     private readonly struct WeakReferenceWrapper<T> where T : class
     {
