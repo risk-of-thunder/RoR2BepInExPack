@@ -1,3 +1,7 @@
+-   **1.27.0**
+
+    -   FixedConditionalWeakTable: Implement Dictionary methods & interfaces.
+
 -   **1.26.0**
 
     -   Appends the exception to the error message of "Failed at InvokeHandler, probably malformed packet!", allowing for better and easier debugging.
