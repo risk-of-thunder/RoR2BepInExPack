@@ -1,3 +1,7 @@
+-   **1.28.0**
+
+    -   Make DMD methods show their IL Lines in stacktraces.
+
 -   **1.27.0**
 
     -   FixedConditionalWeakTable: Implement Dictionary methods & interfaces.
