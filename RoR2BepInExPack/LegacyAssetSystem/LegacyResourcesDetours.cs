@@ -29,17 +29,17 @@ internal static class LegacyResourcesDetours
 
     internal static void Init()
     {
-        _legacyResourcesAPILoad = typeof(LegacyResourcesAPI).GetMethod(nameof(LegacyResourcesAPI.Load), ReflectionHelper.AllFlags);
+        _legacyResourcesAPILoad = typeof(LegacyResourcesAPI).GetMethod(nameof(LegacyResourcesAPI.Load), ReflectionHelper.AllFlags, null, new[] { typeof(string), typeof(bool) }, null);
 
         var resourcesLoadDetourConfig = new NativeDetourConfig { ManualApply = true };
         _resourcesLoadDetour = new NativeDetour(
-                typeof(Resources).GetMethod(nameof(Resources.Load), ReflectionHelper.AllFlags, null, new[] { typeof(string), typeof(Type) }, null),
-                typeof(LegacyResourcesDetours).GetMethod(nameof(OnResourcesLoad), ReflectionHelper.AllFlags),
-                resourcesLoadDetourConfig
-            );
+                    typeof(Resources).GetMethod(nameof(Resources.Load), ReflectionHelper.AllFlags, null, new[] { typeof(string), typeof(Type)
+    }, null),
+                    typeof(LegacyResourcesDetours).GetMethod(nameof(OnResourcesLoad), ReflectionHelper.AllFlags),
+                    resourcesLoadDetourConfig
+                );
         _origLoad = _resourcesLoadDetour.GenerateTrampoline<ResourcesLoadDefinition>();
     }
-
     internal static void Enable()
     {
         _resourcesLoadDetour.Apply();
@@ -59,7 +59,7 @@ internal static class LegacyResourcesDetours
     {
         var legacyResourcesAPILoad = GetGenericLegacyResourcesAPILoad(type);
 
-        var asset = (UnityObject)legacyResourcesAPILoad.Invoke(null, new[] { path });
+        var asset = (UnityObject)legacyResourcesAPILoad.Invoke(null, new object[] { path, true });
         if (asset)
         {
             return asset;
