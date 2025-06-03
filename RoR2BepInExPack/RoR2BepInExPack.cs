@@ -30,6 +30,10 @@ public class RoR2BepInExPack : BaseUnityPlugin
         InitHooks();
 
         Application.quitting += OnApplicationQuitting;
+
+#if DEBUG
+        GameAssetPathsGenerator.Init();
+#endif
     }
 
     private void OnEnable()
