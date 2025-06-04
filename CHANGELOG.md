@@ -1,3 +1,9 @@
+-   **1.29.0**
+
+    -   Add a class that stores game asset paths.
+	-   Fix SaferSearchableAttribute for 1.3.9
+	-   Fix LegacyResourcesDetours for 1.3.9
+
 -   **1.28.0**
 
     -   Make DMD methods show their IL Lines in stacktraces.
