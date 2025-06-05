@@ -1,6 +1,10 @@
+-   **1.30.0**
+
+    -   Try to fix the intellisense performance for GameAssetPaths.
+
 -   **1.29.0**
 
-    -   Add a class that stores game asset paths.
+    -   Add a class that stores game asset paths called GameAssetPaths.
 	-   Fix SaferSearchableAttribute for 1.3.9
 	-   Fix LegacyResourcesDetours for 1.3.9
 
