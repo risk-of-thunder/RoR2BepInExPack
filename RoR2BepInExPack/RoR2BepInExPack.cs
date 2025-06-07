@@ -82,6 +82,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
         LegacyShaderDetours.Init();
 
         FixMultiCorrupt.Init(Config);
+        HarmonyMatchException.Init();
     }
 
     private static void EnableHooks()
@@ -112,10 +113,12 @@ public class RoR2BepInExPack : BaseUnityPlugin
         LegacyShaderDetours.Enable();
 
         FixMultiCorrupt.Enable();
+        HarmonyMatchException.Enable();
     }
 
     private static void DisableHooks()
     {
+        HarmonyMatchException.Disable();
         FixMultiCorrupt.Disable();
 
         LegacyShaderDetours.Disable();
@@ -146,6 +149,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
 
     private static void DestroyHooks()
     {
+        HarmonyMatchException.Destroy();
         FixMultiCorrupt.Destroy();
 
         LegacyShaderDetours.Destroy();
