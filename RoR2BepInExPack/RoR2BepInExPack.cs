@@ -31,7 +31,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
 
         Application.quitting += OnApplicationQuitting;
 
-#if DEBUG
+#if GENERATE_GAME_ASSET_PATHS
         GameAssetPathsGenerator.Init();
 #endif
     }
