@@ -10,8 +10,10 @@ using MonoMod.RuntimeDetour;
 
 namespace RoR2BepInExPack.VanillaFixes;
 
-[HarmonyPatch]
-public class MatchFailTest
+// commenting this out cuz debug builds are fucked lol
+
+/*[HarmonyPatch]
+internal class MatchFailTest
 {
     [HarmonyPatch(typeof(HarmonyMatchException), nameof(HarmonyMatchException.TestDmdHook), MethodType.Enumerator)]
     [HarmonyPrefix]
@@ -37,51 +39,75 @@ public class MatchFailTest
         c.TryFindNext(out c2, x => x.MatchBrfalse(out _));
         c.TryFindNext(out c2, x => x.MatchBr(out _));
     }
-}
+}*/
 
-public class HarmonyMatchException
+internal class HarmonyMatchException
 {
     private static ILHook _hook;
-    private static Harmony _harmony;
+
+    //private static Harmony _harmony;
 
     internal static void Init()
     {
-        _harmony = new Harmony(nameof(HarmonyMatchException));
+        //_harmony = new Harmony(nameof(HarmonyMatchException));
 
         var method = AccessTools.DeclaredMethod(typeof(HarmonyManipulator), "ApplyManipulators") ?? AccessTools.DeclaredMethod(typeof(HarmonyManipulator), "ApplyILManipulators");
         if (method is null)
+        {
+            Log.Error($"Could not apply fix for {nameof(HarmonyMatchException)}, target method is invalid");
             return;
+        }
 
-        //_hook = new ILHook(method, FixHarmonyMatchException, new ILHookConfig { ManualApply = true });
+        _hook = new ILHook(method, FixHarmonyMatchException, new ILHookConfig { ManualApply = true });
     }
+    /*
+    internal static IEnumerator TestDmdHook()
+    {
+        yield return null;
+
+        if (true)
+        {
+            yield return null;
+        }
+        if (false)
+        {
+            yield return null;
+        }
+        yield break;
+    }
+    */
     internal static void Enable()
     {
         _hook?.Apply();
-        _harmony.CreateClassProcessor(typeof(MatchFailTest)).Patch();
+        //_harmony.CreateClassProcessor(typeof(MatchFailTest)).Patch();
     }
 
     internal static void Disable()
     {
         _hook?.Undo();
-        _harmony?.UnpatchSelf();
+        //_harmony?.UnpatchSelf();
     }
 
     internal static void Destroy()
     {
         _hook?.Free();
-        _harmony = null;
+        //_harmony = null;
     }
 
     // Replaces the call to GetFileLineNumber to a call to GetLineOrIL
-    public static void FixHarmonyMatchException(ILContext il)
+    internal static void FixHarmonyMatchException(ILContext il)
     {
         var c = new ILCursor(il);
-        c.GotoNext(MoveType.AfterLabel,
+        if (!c.TryGotoNext(MoveType.AfterLabel,
                 x => x.MatchLdnull(),
                 x => x.MatchLdloc(out _),
                 x => x.MatchCallvirt(out _),
                 x => x.MatchCallvirt(AccessTools.Method(typeof(MethodBase), nameof(MethodBase.Invoke), [typeof(object), typeof(object[])])),
-                x => x.MatchPop());
+                x => x.MatchPop()))
+        {
+            Log.Error($"Could not apply fix for {nameof(FixHarmonyMatchException)}");
+            return;
+        }
 
         c.Emit(OpCodes.Ldarg_0);
         c.EmitDelegate(ApplyILLabels);
@@ -91,7 +117,7 @@ public class HarmonyMatchException
         c.EmitDelegate(UnApplyILLabels);
     }
 
-    public static void ApplyILLabels(ILContext il)
+    internal static void ApplyILLabels(ILContext il)
     {
         if (il?.Instrs is null)
             return;
@@ -108,7 +134,7 @@ public class HarmonyMatchException
         }
     }
 
-    public static void UnApplyILLabels(ILContext il)
+    internal static void UnApplyILLabels(ILContext il)
     {
         if (il?.Instrs is null || il.IsReadOnly)
             return;
@@ -123,20 +149,5 @@ public class HarmonyMatchException
             else if (instr.Operand is ILLabel[] targets)
                 instr.Operand = targets.Select(l => l.Target).ToArray();
         }
-    }
-
-    public static IEnumerator TestDmdHook()
-    {
-        yield return null;
-
-        if (true)
-        {
-            yield return null;
-        }
-        if (false)
-        {
-            yield return null;
-        }
-        yield break;
     }
 }
