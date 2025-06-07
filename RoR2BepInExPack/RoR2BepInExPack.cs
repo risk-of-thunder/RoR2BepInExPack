@@ -118,6 +118,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
 
     private static void DisableHooks()
     {
+        HarmonyMatchException.Disable();
         FixMultiCorrupt.Disable();
 
         LegacyShaderDetours.Disable();
@@ -144,11 +145,11 @@ public class RoR2BepInExPack : BaseUnityPlugin
         SaferAchievementManager.Disable();
         AutoCatchReflectionTypeLoadException.Disable();
         ILLine.Disable();
-        HarmonyMatchException.Disable();
     }
 
     private static void DestroyHooks()
     {
+        HarmonyMatchException.Destroy();
         FixMultiCorrupt.Destroy();
 
         LegacyShaderDetours.Destroy();
@@ -175,7 +176,6 @@ public class RoR2BepInExPack : BaseUnityPlugin
         SaferAchievementManager.Destroy();
         AutoCatchReflectionTypeLoadException.Destroy();
         ILLine.Destroy();
-        HarmonyMatchException.Destroy();
     }
 
     private void OnApplicationQuitting()
