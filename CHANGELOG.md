@@ -1,6 +1,10 @@
+-   **1.31.0**
+
+    -   Fix a nullref exception on MatchBr in HarmonyILManipulator hooks.
+
 -   **1.30.0**
 
-    -   Try to fix the intellisense performance for GameAssetPaths.
+    -   Fix the intellisense performance for GameAssetPaths.
 
 -   **1.29.0**
 
