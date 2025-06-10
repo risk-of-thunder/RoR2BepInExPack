@@ -10,7 +10,7 @@ namespace RoR2BepInExPack.ReflectionHooks;
 // Fix: Catch it for them and return non null types
 internal class AutoCatchReflectionTypeLoadException
 {
-    private static Hook _onHook;
+    private static Hook _onHook, _onHook2;
 
     internal static void Init()
     {
@@ -23,21 +23,33 @@ internal class AutoCatchReflectionTypeLoadException
                     typeof(AutoCatchReflectionTypeLoadException).GetMethod(nameof(AutoCatchReflectionTypeLoadException.SaferGetTypes), ReflectionHelper.AllFlags),
                     ref ilHookConfig
                 );
+        var ilHookConfig2 = new HookConfig() { ManualApply = true };
+        _onHook2 = new Hook(
+                    typeof(Assembly).GetMethods(ReflectionHelper.AllFlags).
+                    First(
+                        m => m.Name == nameof(Assembly.GetExportedTypes) && m.GetParameters().Length == 0 &&
+                        (m.MethodImplementationFlags & MethodImplAttributes.InternalCall) == 0),
+                    typeof(AutoCatchReflectionTypeLoadException).GetMethod(nameof(AutoCatchReflectionTypeLoadException.SaferGetTypes), ReflectionHelper.AllFlags),
+                    ref ilHookConfig2
+                );
     }
 
     internal static void Enable()
     {
         _onHook.Apply();
+        _onHook2.Apply();
     }
 
     internal static void Disable()
     {
         _onHook.Undo();
+        _onHook2.Undo();
     }
 
     internal static void Destroy()
     {
         _onHook.Free();
+        _onHook2.Free();
     }
 
     private static Type[] SaferGetTypes(Func<Assembly, Type[]> orig, Assembly self)
