@@ -1,4 +1,4 @@
-﻿#if DEBUG
+﻿#if GENERATE_GAME_ASSET_PATHS
 using System;
 using System.Collections.Generic;
 using System.IO;

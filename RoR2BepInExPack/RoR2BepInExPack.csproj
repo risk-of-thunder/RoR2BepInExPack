@@ -5,6 +5,7 @@
 		<LangVersion>preview</LangVersion>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<!-- <DefineConstants>GENERATE_GAME_ASSET_PATHS</DefineConstants> -->
 	</PropertyGroup>
 
 	<ItemGroup>

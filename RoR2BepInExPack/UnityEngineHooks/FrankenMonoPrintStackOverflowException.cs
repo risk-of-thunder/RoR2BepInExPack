@@ -44,7 +44,7 @@ internal unsafe static class FrankenMonoPrintStackOverflowException
         }
         catch (StackOverflowException e)
         {
-            Log.Info("SOE fix applied");
+            Log.Info("SOE fix works!");
         }
 #endif
     }
