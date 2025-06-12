@@ -1,3 +1,7 @@
+-   **1.32.0**
+
+    -   Add some `System.Reflection` safety by hooking `Assembly.GeExportedtTypes` and catching all potential `ReflectionTypeLoadException`
+
 -   **1.31.0**
 
     -   Fix a nullref exception on MatchBr in HarmonyILManipulator hooks.
