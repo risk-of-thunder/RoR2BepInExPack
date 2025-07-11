@@ -1,3 +1,7 @@
+-   **1.33.0**
+
+    Add a new namespace called `GameAssetPathsBetter`, and mark the older one, `GameAssetPaths`, as obsolete. This change fixes some issues with how the class paths were previously structured, specifically that the `/` separator was not always consistently respected.
+
 -   **1.32.0**
 
     -   Add some `System.Reflection` safety by hooking `Assembly.GeExportedtTypes` and catching all potential `ReflectionTypeLoadException`
@@ -8,11 +12,11 @@
 
 -   **1.30.0**
 
-    -   Fix the intellisense performance for GameAssetPaths.
+    -   Fix the intellisense performance for `GameAssetPaths`.
 
 -   **1.29.0**
 
-    -   Add a class that stores game asset paths called GameAssetPaths.
+    -   Add a class that stores game asset paths called `GameAssetPaths`.
 	-   Fix SaferSearchableAttribute for 1.3.9
 	-   Fix LegacyResourcesDetours for 1.3.9
 
