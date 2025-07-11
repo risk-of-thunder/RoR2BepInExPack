@@ -21,7 +21,7 @@ internal static class GameAssetPathsGenerator
     internal static void Init()
     {
         var jsonPath = Path.Combine(BepInEx.Paths.GameRootPath, "Risk of Rain 2_Data", "StreamingAssets", "lrapi_returns.json");
-        string outputPath = "GameAssetPaths.cs";
+        string outputPath = "GameAssetPathsBetter.cs";
 
         if (!File.Exists(jsonPath))
         {
@@ -31,7 +31,7 @@ internal static class GameAssetPathsGenerator
 
         string jsonContent = File.ReadAllText(jsonPath);
 
-        Dictionary<string, string>? assets;
+        Dictionary<string, string> assets;
         try
         {
             assets = JsonConvert.DeserializeObject<Dictionary<string, string>>(jsonContent);
@@ -52,33 +52,18 @@ internal static class GameAssetPathsGenerator
 
         foreach (var kvp in assets)
         {
-            var key = SanitizeKey(kvp.Key);
-            var rawParts = Regex.Split(key, @"[^a-zA-Z0-9]+");
-            var parts = rawParts
-                .Select(SanitizeIdentifier)
+            var key = kvp.Key;
+            var parts = key.SplitOnceFromLastIndexOf('/')
+                .Select(SanitizeForCSharp)
                 .Where(p => !string.IsNullOrWhiteSpace(p))
                 .ToList();
+            var className = parts[0];
+            var variableName = parts.Count > 1 ? parts[1] : "Asset";
 
-            if (parts.Count < 3)
-            {
-                Console.WriteLine($"Skipping malformed key: {kvp.Key}");
-                continue;
-            }
-
-            // First part is the namespace
-            // Class name is middle parts (everything except first and last 2)
-            var classParts = parts.Take(parts.Count - 2).ToList();
-            // Variable is last 2 parts joined
-            var variableName = parts[^2] + "_" + parts[^1];
-
-            // Handle single-part class name fallback
-            var className = string.Join("_", classParts);
-
-            // Sanitize identifiers against C# keywords
             className = DontUseCSharpKeywords(className);
             variableName = DontUseCSharpKeywords(variableName);
 
-            var fullNamespace = "RoR2BepInExPack.GameAssetPaths";
+            var fullNamespace = "RoR2BepInExPack.GameAssetPathsBetter";
 
             if (!namespaceToClass.TryGetValue(fullNamespace, out var classMap))
             {
@@ -146,6 +131,27 @@ internal static class GameAssetPathsGenerator
         Log.Error($"C# class generated at {Path.GetFullPath(outputPath)}");
     }
 
+    private static string[] SplitOnceFromLastIndexOf(this string key, char separator)
+    {
+        int lastSep = key.LastIndexOf(separator);
+
+        string[] parts;
+        if (lastSep == -1)
+        {
+            parts = [key];
+        }
+        else
+        {
+            parts =
+            [
+                key.Substring(0, lastSep),
+                    key.Substring(lastSep + 1)
+            ];
+        }
+
+        return parts;
+    }
+
     static void AppendLineAssetNoTypeFound(StringBuilder sb, string key, string value)
     {
         if (key.EndsWith("_unity"))
@@ -174,18 +180,10 @@ internal static class GameAssetPathsGenerator
         return str;
     }
 
-    static string SanitizeKey(string key)
+    static string SanitizeForCSharp(string input)
     {
-        string sanitized = Regex.Replace(key, @"[^a-zA-Z0-9_]", "_");
-        if (char.IsDigit(sanitized[0]))
-            sanitized = "_" + sanitized;
-        return sanitized;
-    }
-
-    static string SanitizeIdentifier(string input)
-    {
-        string clean = Regex.Replace(input, @"[^a-zA-Z0-9_]", "_");
-        return char.IsLetter(clean[0]) ? clean : "_" + clean;
+        string s = Regex.Replace(input, @"[^a-zA-Z0-9_]", "_");
+        return char.IsLetter(s[0]) ? s : "_" + s;
     }
 }
 #endif
