@@ -1,6 +1,10 @@
+-   **1.34.0**
+
+    -   Added missing paths to `GameAssetPathsBetter`
+
 -   **1.33.0**
 
-    Add a new namespace called `GameAssetPathsBetter`, and mark the older one, `GameAssetPaths`, as obsolete. This change fixes some issues with how the class paths were previously structured, specifically that the `/` separator was not always consistently respected.
+    -   Add a new namespace called `GameAssetPathsBetter`, and mark the older one, `GameAssetPaths`, as obsolete. This change fixes some issues with how the class paths were previously structured, specifically that the `/` separator was not always consistently respected.
 
 -   **1.32.0**
 

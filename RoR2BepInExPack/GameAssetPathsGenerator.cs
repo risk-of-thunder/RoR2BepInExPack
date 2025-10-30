@@ -7,21 +7,17 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using UnityEngine.AddressableAssets;
+using UnityEngine.AddressableAssets.ResourceLocators;
 
 namespace RoR2BepInExPack;
 
 internal static class GameAssetPathsGenerator
 {
-    struct AssetVariableToGuid
-    {
-        public string Variable;
-        public string Guid;
-    }
-
     internal static void Init()
     {
+        var outputPath = "GameAssetPathsBetter.cs";
         var jsonPath = Path.Combine(BepInEx.Paths.GameRootPath, "Risk of Rain 2_Data", "StreamingAssets", "lrapi_returns.json");
-        string outputPath = "GameAssetPathsBetter.cs";
+        var guidRegex = new Regex("^[0-9a-f]{32}$", RegexOptions.Compiled);
 
         if (!File.Exists(jsonPath))
         {
@@ -31,10 +27,10 @@ internal static class GameAssetPathsGenerator
 
         string jsonContent = File.ReadAllText(jsonPath);
 
-        Dictionary<string, string> assets;
+        Dictionary<string, string> lrapiAssets;
         try
         {
-            assets = JsonConvert.DeserializeObject<Dictionary<string, string>>(jsonContent);
+            lrapiAssets = JsonConvert.DeserializeObject<Dictionary<string, string>>(jsonContent).ToDictionary(i => i.Value, i => i.Key);
         }
         catch (Exception ex)
         {
@@ -42,80 +38,94 @@ internal static class GameAssetPathsGenerator
             return;
         }
 
-        if (assets == null)
+        if (lrapiAssets == null)
         {
             Log.Error("Failed to parse JSON.");
             return;
         }
 
-        var namespaceToClass = new Dictionary<string, Dictionary<string, List<AssetVariableToGuid>>>();
-
-        foreach (var kvp in assets)
+        var locator = Addressables.m_Addressables.ResourceLocators.FirstOrDefault(l => l.LocatorId == "AddressablesMainContentCatalog") as ResourceLocationMap;
+        if (locator == null)
         {
-            var key = kvp.Key;
-            var parts = key.SplitOnceFromLastIndexOf('/')
-                .Select(SanitizeForCSharp)
-                .Where(p => !string.IsNullOrWhiteSpace(p))
-                .ToList();
-            var className = parts[0];
-            var variableName = parts.Count > 1 ? parts[1] : "Asset";
+            Log.Error("Couldn't find game's locator");
+            return;
+        }
 
-            className = DontUseCSharpKeywords(className);
-            variableName = DontUseCSharpKeywords(variableName);
+        var namespaceToClass = new Dictionary<string, Dictionary<string, Dictionary<string, Dictionary<string, List<Type>>>>>();
 
-            var fullNamespace = "RoR2BepInExPack.GameAssetPathsBetter";
-
-            if (!namespaceToClass.TryGetValue(fullNamespace, out var classMap))
+        foreach (var (key, locations) in locator.Locations)
+        {
+            //There are at least 3 different key formats in the locator, filtering for guids
+            if (key is not string guid || guid.Length != 32 || !guidRegex.IsMatch(guid))
             {
-                classMap = new Dictionary<string, List<AssetVariableToGuid>>();
-                namespaceToClass[fullNamespace] = classMap;
+                continue;
             }
 
-            if (!classMap.TryGetValue(className, out var assetList))
+            foreach (var location in locations)
             {
-                assetList = new List<AssetVariableToGuid>();
-                classMap[className] = assetList;
-            }
+                var parts = location.PrimaryKey.SplitOnceFromLastIndexOf('/')
+                    .Select(SanitizeForCSharp)
+                    .Where(p => !string.IsNullOrWhiteSpace(p))
+                    .ToList();
+                var className = parts[0];
+                var variableName = parts.Count > 1 ? parts[1] : "Asset";
 
-            assetList.Add(new AssetVariableToGuid
-            {
-                Variable = variableName,
-                Guid = kvp.Value
-            });
+                className = DontUseCSharpKeywords(className);
+                variableName = DontUseCSharpKeywords(variableName);
+
+                var fullNamespace = "RoR2BepInExPack.GameAssetPathsBetter";
+                if (!namespaceToClass.TryGetValue(fullNamespace, out var classMap))
+                {
+                    namespaceToClass[fullNamespace] = classMap = [];
+                }
+
+                if (!classMap.TryGetValue(className, out var variableMap))
+                {
+                    classMap[className] = variableMap = [];
+                }
+
+                if (!variableMap.TryGetValue(variableName, out var assetMap))
+                {
+                    variableMap[variableName] = assetMap = [];
+                }
+
+                if (!assetMap.TryGetValue(guid, out var typesList))
+                {
+                    assetMap[guid] = typesList = [];
+                }
+                typesList.Add(location.ResourceType);
+            }
         }
 
         var sb = new StringBuilder();
         sb.AppendLine("#pragma warning disable CS1591");
-        foreach (var (ns, classData) in namespaceToClass)
+        foreach (var (ns, classData) in namespaceToClass.OrderBy(e => e.Key))
         {
             sb.AppendLine($"namespace {ns}");
             sb.AppendLine("{");
 
-            foreach (var (className, variableData) in classData)
+            foreach (var (className, variableData) in classData.OrderBy(e => e.Key))
             {
                 sb.AppendLine($"    public static class {className}");
                 sb.AppendLine("    {");
-                foreach (var assetMetaData in variableData)
+                foreach (var (variable, assets) in variableData.OrderBy(e => e.Key))
                 {
-                    try
+                    if (assets.Count > 1)
                     {
-                        var asset = Addressables.LoadAssetAsync<UnityObject>(assetMetaData.Guid).WaitForCompletion();
-                        if (asset)
+                        foreach (var asset in assets.OrderBy(e => e.Key))
                         {
-                            var assetType = asset.GetType().FullName;
-                            sb.AppendLine($"    /// <summary>");
-                            sb.AppendLine($"    /// {assetType}");
-                            sb.AppendLine($"    /// </summary>");
-                            sb.AppendLine($"    public static string {assetMetaData.Variable} = \"{assetMetaData.Guid}\";");
-                        }
-                        else
-                        {
-                            AppendLineAssetNoTypeFound(sb, assetMetaData.Variable, assetMetaData.Guid);
+                            //For backwards compatibility generate non-unique name for a guid in lrapi_returns.json
+                            if (lrapiAssets.ContainsKey(asset.Key))
+                            {
+                                WriteField(string.Join(", ", asset.Value.Select(t => t.FullName)), variable, asset.Key);
+                            }
+                            WriteField(string.Join(", ", asset.Value.Select(t => t.FullName)), $"{variable}_{asset.Key[..8]}", asset.Key);
                         }
                     }
-                    catch (Exception)
+                    else
                     {
-                        AppendLineAssetNoTypeFound(sb, assetMetaData.Variable, assetMetaData.Guid);
+                        var asset = assets.First();
+                        WriteField(string.Join(", ", asset.Value.Select(t => t.FullName)), variable, asset.Key);
                     }
                 }
                 sb.AppendLine("    }");
@@ -129,6 +139,14 @@ internal static class GameAssetPathsGenerator
         File.WriteAllText(outputPath, sb.ToString());
 
         Log.Error($"C# class generated at {Path.GetFullPath(outputPath)}");
+
+        void WriteField(string types, string variable, string value)
+        {
+            sb.AppendLine($"        /// <summary>");
+            sb.AppendLine($"        /// {types}");
+            sb.AppendLine($"        /// </summary>");
+            sb.AppendLine($"        public static string {variable} = \"{value}\";");
+        }
     }
 
     private static string[] SplitOnceFromLastIndexOf(this string key, char separator)
@@ -150,24 +168,6 @@ internal static class GameAssetPathsGenerator
         }
 
         return parts;
-    }
-
-    static void AppendLineAssetNoTypeFound(StringBuilder sb, string key, string value)
-    {
-        if (key.EndsWith("_unity"))
-        {
-            sb.AppendLine($"    /// <summary>");
-            sb.AppendLine($"    /// Unity Scene");
-            sb.AppendLine($"    /// </summary>");
-        }
-        else
-        {
-            sb.AppendLine($"    /// <summary>");
-            sb.AppendLine($"    /// Asset loading failed");
-            sb.AppendLine($"    /// </summary>");
-        }
-
-        sb.AppendLine($"    public static string {key} = \"{value}\";");
     }
 
     private static string DontUseCSharpKeywords(string str)
