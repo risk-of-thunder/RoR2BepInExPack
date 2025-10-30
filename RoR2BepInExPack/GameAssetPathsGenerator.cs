@@ -1,4 +1,4 @@
-﻿#if GENERATE_GAME_ASSET_PATHS
+﻿#if !GENERATE_GAME_ASSET_PATHS
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -99,20 +99,20 @@ internal static class GameAssetPathsGenerator
 
         var sb = new StringBuilder();
         sb.AppendLine("#pragma warning disable CS1591");
-        foreach (var (ns, classData) in namespaceToClass)
+        foreach (var (ns, classData) in namespaceToClass.OrderBy(e => e.Key))
         {
             sb.AppendLine($"namespace {ns}");
             sb.AppendLine("{");
 
-            foreach (var (className, variableData) in classData)
+            foreach (var (className, variableData) in classData.OrderBy(e => e.Key))
             {
                 sb.AppendLine($"    public static class {className}");
                 sb.AppendLine("    {");
-                foreach (var (variable, assets) in variableData.OrderBy(v => v.Key))
+                foreach (var (variable, assets) in variableData.OrderBy(e => e.Key))
                 {
                     if (assets.Count > 1)
                     {
-                        foreach (var asset in assets)
+                        foreach (var asset in assets.OrderBy(e => e.Key))
                         {
                             //For backwards compatibility generate non-unique name for a guid in lrapi_returns.json
                             if (lrapiAssets.ContainsKey(asset.Key))
