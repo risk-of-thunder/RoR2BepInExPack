@@ -1,3 +1,7 @@
+-   **1.36.0**
+
+    -   Version bump to synchronize with the nuget.org release.
+
 -   **1.35.0**
 
     -   Added a new `GameAssetPaths` class for the DLC 3 release. Going forward, all modifications to game asset path definitions will be introduced as new iterations of this class within versioned namespaces to maintain backward compatibility. The latest changes, for example, are available under the `RoR2BepInExPack.GameAssetPaths.Version_1_35_0` namespace.
