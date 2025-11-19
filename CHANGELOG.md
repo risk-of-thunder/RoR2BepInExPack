@@ -1,6 +1,10 @@
+-   **1.35.0**
+
+    -   Added a new `GameAssetPaths` class for the DLC 3 release. Going forward, all modifications to game asset path definitions will be introduced as new iterations of this class within versioned namespaces to maintain backward compatibility. The latest changes, for example, are available under the `RoR2BepInExPack.GameAssetPaths.Version_1_35_0` namespace.
+
 -   **1.34.0**
 
-    -   Added missing paths to `GameAssetPathsBetter`
+    -   Added missing paths to `GameAssetPathsBetter`.
 
 -   **1.33.0**
 
