@@ -27,10 +27,10 @@ internal static class GameAssetPathsGenerator
 
         string jsonContent = File.ReadAllText(jsonPath);
 
-        Dictionary<string, string> lrapiAssets;
+        Dictionary<object, string> lrapiAssets;
         try
         {
-            lrapiAssets = JsonConvert.DeserializeObject<Dictionary<string, string>>(jsonContent).ToDictionary(i => i.Value, i => i.Key);
+            lrapiAssets = JsonConvert.DeserializeObject<Dictionary<string, object>>(jsonContent).ToDictionary(i => i.Value, i => i.Key);
         }
         catch (Exception ex)
         {
