@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using Newtonsoft.Json;
 using UnityEngine.AddressableAssets;
 using UnityEngine.AddressableAssets.ResourceLocators;
 
@@ -15,34 +14,8 @@ internal static class GameAssetPathsGenerator
 {
     internal static void Init()
     {
-        var outputPath = "GameAssetPathsBetter.cs";
-        var jsonPath = Path.Combine(BepInEx.Paths.GameRootPath, "Risk of Rain 2_Data", "StreamingAssets", "lrapi_returns.json");
+        var outputPath = "GameAssetPaths.cs";
         var guidRegex = new Regex("^[0-9a-f]{32}$", RegexOptions.Compiled);
-
-        if (!File.Exists(jsonPath))
-        {
-            Log.Error("JSON file not found.");
-            return;
-        }
-
-        string jsonContent = File.ReadAllText(jsonPath);
-
-        Dictionary<object, string> lrapiAssets;
-        try
-        {
-            lrapiAssets = JsonConvert.DeserializeObject<Dictionary<string, object>>(jsonContent).ToDictionary(i => i.Value, i => i.Key);
-        }
-        catch (Exception ex)
-        {
-            Log.Error("Failed to parse JSON: " + ex.Message);
-            return;
-        }
-
-        if (lrapiAssets == null)
-        {
-            Log.Error("Failed to parse JSON.");
-            return;
-        }
 
         var locator = Addressables.m_Addressables.ResourceLocators.FirstOrDefault(l => l.LocatorId == "AddressablesMainContentCatalog") as ResourceLocationMap;
         if (locator == null)
@@ -73,7 +46,7 @@ internal static class GameAssetPathsGenerator
                 className = DontUseCSharpKeywords(className);
                 variableName = DontUseCSharpKeywords(variableName);
 
-                var fullNamespace = "RoR2BepInExPack.GameAssetPathsBetter";
+                var fullNamespace = "RoR2BepInExPack.GameAssetPaths.Version_" + RoR2BepInExPack.PluginVersion.Replace(".", "_");
                 if (!namespaceToClass.TryGetValue(fullNamespace, out var classMap))
                 {
                     namespaceToClass[fullNamespace] = classMap = [];
@@ -114,11 +87,6 @@ internal static class GameAssetPathsGenerator
                     {
                         foreach (var asset in assets.OrderBy(e => e.Key))
                         {
-                            //For backwards compatibility generate non-unique name for a guid in lrapi_returns.json
-                            if (lrapiAssets.ContainsKey(asset.Key))
-                            {
-                                WriteField(string.Join(", ", asset.Value.Select(t => t.FullName)), variable, asset.Key);
-                            }
                             WriteField(string.Join(", ", asset.Value.Select(t => t.FullName)), $"{variable}_{asset.Key[..8]}", asset.Key);
                         }
                     }
