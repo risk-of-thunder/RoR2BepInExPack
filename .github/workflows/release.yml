@@ -53,7 +53,7 @@ jobs:
         dotnet pack --configuration Release /p:PackageOutputPath=./ReleaseOutput /p:OutputPath=./ReleaseOutput
 
     - name: Push to NuGet
-      if: ${{ inputs.skip_nuget == 'false' }}
+      if: ${{ inputs.skip_nuget != 'true' }}
       run: |
         nuget setapikey "${{ secrets.NUGET_API_KEY }}"
         nuget push ./src/ReleaseOutput/*.nupkg -Source 'https://api.nuget.org/v3/index.json'
@@ -66,7 +66,7 @@ jobs:
         find . -name '*.nupkg' -type f -delete
 
     - name: Publish to Thunderstore
-      if: ${{ inputs.skip_thunderstore == 'false' }}
+      if: ${{ inputs.skip_thunderstore != 'true' }}
       run: |
         echo "CWD: $(pwd)"
         ls -la
