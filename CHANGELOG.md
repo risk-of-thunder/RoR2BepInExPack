@@ -1,3 +1,7 @@
+-   **1.37.0**
+
+	-   Removed obsolete vanilla fixes.
+
 -   **1.36.0**
 
     -   Version bump to synchronize with the nuget.org release.

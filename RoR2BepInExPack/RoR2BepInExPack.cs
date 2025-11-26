@@ -15,7 +15,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
 {
     public const string PluginGUID = "___riskofthunder" + "." + PluginName;
     public const string PluginName = "RoR2BepInExPack";
-    public const string PluginVersion = "1.36.0";
+    public const string PluginVersion = "1.37.0";
 
     private void Awake()
     {
@@ -63,15 +63,11 @@ public class RoR2BepInExPack : BaseUnityPlugin
         FixConsoleLog.Init();
         FixConVar.Init();
         FixDeathAnimLog.Init();
-        FixNullBone.Init();
         FixExtraGameModesMenu.Init();
-        FixProjectileCatalogLimitError.Init();
         SaferWWise.Init();
         FixNullEntitlement.Init();
-        FixExposeLog.Init();
         FixNonLethalOneHP.Init();
         FixRunScaling.Init();
-        FixCharacterBodyRemoveOldestTimedBuff.Init();
         FixDedicatedServerMaxPlayerCount.Init();
         FixHasEffectiveAuthority.Init();
         FixSystemInitializer.Init();
@@ -95,15 +91,11 @@ public class RoR2BepInExPack : BaseUnityPlugin
         FixConsoleLog.Enable();
         FixConVar.Enable();
         FixDeathAnimLog.Enable();
-        FixNullBone.Enable();
         FixExtraGameModesMenu.Enable();
-        FixProjectileCatalogLimitError.Enable();
         SaferWWise.Enable();
         FixNullEntitlement.Enable();
-        FixExposeLog.Enable();
         FixNonLethalOneHP.Enable();
         FixRunScaling.Enable();
-        FixCharacterBodyRemoveOldestTimedBuff.Enable();
         FixDedicatedServerMaxPlayerCount.Enable();
         FixHasEffectiveAuthority.Enable();
         FixRuleBookViewerStrip.Enable();
@@ -127,15 +119,11 @@ public class RoR2BepInExPack : BaseUnityPlugin
         LogNetworkInvokeException.Disable();
         FixHasEffectiveAuthority.Disable();
         FixDedicatedServerMaxPlayerCount.Disable();
-        FixCharacterBodyRemoveOldestTimedBuff.Disable();
         FixRunScaling.Disable();
         FixNonLethalOneHP.Disable();
-        FixExposeLog.Disable();
         FixNullEntitlement.Disable();
         SaferWWise.Disable();
-        FixProjectileCatalogLimitError.Disable();
         FixExtraGameModesMenu.Disable();
-        FixNullBone.Disable();
         FixDeathAnimLog.Disable();
         FixConsoleLog.Disable();
         FixConVar.Disable();
@@ -158,15 +146,11 @@ public class RoR2BepInExPack : BaseUnityPlugin
         LogNetworkInvokeException.Destroy();
         FixHasEffectiveAuthority.Destroy();
         FixDedicatedServerMaxPlayerCount.Destroy();
-        FixCharacterBodyRemoveOldestTimedBuff.Destroy();
         FixRunScaling.Destroy();
         FixNonLethalOneHP.Destroy();
-        FixExposeLog.Destroy();
         FixNullEntitlement.Destroy();
         SaferWWise.Destroy();
-        FixProjectileCatalogLimitError.Destroy();
         FixExtraGameModesMenu.Destroy();
-        FixNullBone.Destroy();
         FixDeathAnimLog.Destroy();
         FixConsoleLog.Destroy();
         FixConVar.Destroy();
