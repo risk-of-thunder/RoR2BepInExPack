@@ -1,4 +1,4 @@
-name: Nuget Release
+name: Release
 
 on:
   release:
@@ -16,10 +16,13 @@ jobs:
     - name: Setup NuGet
       uses: NuGet/setup-nuget@v1
 
+    - name: Setup TCLI
+      run: dotnet tool install --global tcli
+
     - name: Setup dotnet
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: 7.0.x
+        dotnet-version: 8.0.x
 
     # Install Mono on Ubuntu to run nuget.exe (due to this issue on Ubuntu 24 that hasn't been fixed yet - https://github.com/NuGet/setup-nuget/issues/168)
     - name: Install Mono on Ubuntu
@@ -35,14 +38,28 @@ jobs:
       run: |
         set -x
 
-        version=$(grep -oP '(?<=PluginVersion = ")[^"]*' ./RoR2BepInExPack/RoR2BepInExPack.cs)
+        version=$(grep -oP '(?<=PluginVersion = ")[^"]*' ./src/RoR2BepInExPack.cs)
 
-        sed -i "0,/<PropertyGroup>/s/<PropertyGroup>/<PropertyGroup>\n    <Version>$version<\/Version>/" ./RoR2BepInExPack/RoR2BepInExPack.csproj
+        # nuget
 
-        sed -i "0,/<PropertyGroup>/s/<PropertyGroup>/<PropertyGroup>\n    <AssemblyVersion>$version<\/AssemblyVersion>/" ./RoR2BepInExPack/RoR2BepInExPack.csproj
+        sed -i "0,/<PropertyGroup>/s/<PropertyGroup>/<PropertyGroup>\n    <Version>$version<\/Version>/" ./src/RoR2BepInExPack.csproj
+
+        sed -i "0,/<PropertyGroup>/s/<PropertyGroup>/<PropertyGroup>\n    <AssemblyVersion>$version<\/AssemblyVersion>/" ./src/RoR2BepInExPack.csproj
 
         dotnet pack --configuration Release /p:PackageOutputPath=./ReleaseOutput /p:OutputPath=./ReleaseOutput
 
         nuget setapikey "${{ secrets.NUGET_API_KEY }}"
 
-        nuget push ./RoR2BepInExPack/ReleaseOutput/*.nupkg -Source 'https://api.nuget.org/v3/index.json'
+        nuget push ./src/ReleaseOutput/*.nupkg -Source 'https://api.nuget.org/v3/index.json'
+
+        # thunderstore
+
+        find . -name '*.pdb' -type f -delete
+        find . -name '*.deps.json' -type f -delete
+        find . -name '*.nupkg' -type f -delete
+
+        cd thunderstore
+        
+        sed -i "s/versionNumber = \"[^\"]*\"/versionNumber = \"$version\"/" thunderstore.toml
+
+        tcli publish --token ${{ secrets.TCLI_AUTH_TOKEN_RISK_OF_THUNDER }}

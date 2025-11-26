@@ -1,0 +1,36 @@
+
+[config]
+schemaVersion = "0.0.1"
+
+[package]
+namespace = "RiskofThunder"
+name = "RoR2BepInExPack"
+versionNumber = "1.0.0"
+description = "Simplify the modding ecosystem of Risk of Rain 2, making it easier for modders to create and maintain their mods while preventing harmful bugs."
+websiteUrl = "https://github.com/risk-of-thunder/RoR2BepInExPack"
+containsNsfwContent = false
+
+[package.dependencies]
+bbepis-BepInExPack = "5.4.2121"
+
+[build]
+icon = "./icon.png"
+readme = "../README.md"
+outdir = "./build"
+
+[[build.copy]]
+source = "../src/ReleaseOutput"
+target = "./plugins/RoR2BepInExPack"
+
+[[build.copy]]
+source = "../CHANGELOG.md"
+target = "CHANGELOG.md"
+
+[[build.copy]]
+source = "../libs/Newtonsoft.Json.dll"
+target = "./plugins/RoR2BepInExPack/Newtonsoft.Json.dll"
+
+[publish]
+repository = "https://thunderstore.io"
+communities = ["riskofrain2"]
+categories = ["libraries"]
