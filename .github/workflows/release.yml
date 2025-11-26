@@ -42,7 +42,7 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y mono-complete
 
-    - name: Build
+    - name: Build and Publish
       run: |
         set -x
         version=$(grep -oP '(?<=PluginVersion = ")[^"]*' ./src/RoR2BepInExPack.cs)
@@ -52,25 +52,21 @@ jobs:
 
         dotnet pack --configuration Release /p:PackageOutputPath=./ReleaseOutput /p:OutputPath=./ReleaseOutput
 
-    - name: Push to NuGet
-      if: ${{ inputs.skip_nuget != 'true' }}
-      run: |
-        nuget setapikey "${{ secrets.NUGET_API_KEY }}"
-        nuget push ./src/ReleaseOutput/*.nupkg -Source 'https://api.nuget.org/v3/index.json'
+        if [ "${{ github.event.inputs.skip_nuget }}" != 'true' ]; then
+          nuget setapikey "${{ secrets.NUGET_API_KEY }}"
+          nuget push ./src/ReleaseOutput/*.nupkg -Source 'https://api.nuget.org/v3/index.json'
+        fi
 
-    # Clean for Thunderstore packaging
-    - name: Cleanup Before Thunderstore
-      run: |
+        # Clean for Thunderstore packaging
         find . -name '*.pdb' -type f -delete
         find . -name '*.deps.json' -type f -delete
         find . -name '*.nupkg' -type f -delete
 
-    - name: Publish to Thunderstore
-      if: ${{ inputs.skip_thunderstore != 'true' }}
-      run: |
-        echo "CWD: $(pwd)"
-        ls -la
-        cd thunderstore
-        version=$(grep -oP '(?<=PluginVersion = ")[^"]*' ../src/RoR2BepInExPack.cs)
-        sed -i "s/versionNumber = \"[^\"]*\"/versionNumber = \"$version\"/" thunderstore.toml
-        tcli publish --token ${{ secrets.TCLI_AUTH_TOKEN_RISK_OF_THUNDER }}
+        if [ "${{ github.event.inputs.skip_thunderstore }}" != 'true' ]; then
+          echo "CWD: $(pwd)"
+          ls -la
+          cd thunderstore
+          version=$(grep -oP '(?<=PluginVersion = ")[^"]*' ../src/RoR2BepInExPack.cs)
+          sed -i "s/versionNumber = \"[^\"]*\"/versionNumber = \"$version\"/" thunderstore.toml
+          tcli publish --token ${{ secrets.TCLI_AUTH_TOKEN_RISK_OF_THUNDER }}
+        fi
