@@ -11,7 +11,7 @@ websiteUrl = "https://github.com/risk-of-thunder/RoR2BepInExPack"
 containsNsfwContent = false
 
 [package.dependencies]
-bbepis-BepInExPack = "5.4.2121"
+
 
 [build]
 icon = "./icon.png"
