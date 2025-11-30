@@ -1,3 +1,7 @@
+-   **1.38.0**
+
+	-   Remove BepInExPack cyclical dependency.
+
 -   **1.37.0**
 
 	-   Removed obsolete vanilla fixes.
