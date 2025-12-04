@@ -1,3 +1,8 @@
+-   **1.39.0**
+
+    -   Add a `GameAssetPaths` class that supports sub assets.
+	-   Add a `GameAssetPathsSerde` class that contains binary serialization and deserialization methods for Addressables asset guids and paths. A `GameAssetPaths.bin` file is available.
+
 -   **1.38.0**
 
 	-   Remove BepInExPack cyclical dependency.
