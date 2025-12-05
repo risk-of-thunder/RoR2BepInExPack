@@ -5,8 +5,12 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using RoR2BepInExPack.GameAssetPaths.Version_1_39_0;
+using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.AddressableAssets.ResourceLocators;
+using UnityEngine.ResourceManagement.ResourceLocations;
+using UnityEngine.ResourceManagement.ResourceProviders;
 
 namespace RoR2BepInExPack;
 
@@ -17,7 +21,7 @@ internal static class GameAssetPathsGenerator
         var outputPath = "GameAssetPaths.cs";
         var guidRegex = new Regex("^[0-9a-f]{32}$", RegexOptions.Compiled);
 
-        var locator = Addressables.m_Addressables.ResourceLocators.FirstOrDefault(l => l.LocatorId == "AddressablesMainContentCatalog") as ResourceLocationMap;
+        var locator = Addressables.ResourceLocators.FirstOrDefault(l => l.LocatorId == "AddressablesMainContentCatalog") as ResourceLocationMap;
         if (locator == null)
         {
             Log.Error("Couldn't find game's locator");
@@ -25,6 +29,7 @@ internal static class GameAssetPathsGenerator
         }
 
         var namespaceToClass = new Dictionary<string, Dictionary<string, Dictionary<string, Dictionary<string, List<Type>>>>>();
+        Dictionary<string, string> guidToPath = new Dictionary<string, string>();
 
         foreach (var (key, locations) in locator.Locations)
         {
@@ -36,37 +41,72 @@ internal static class GameAssetPathsGenerator
 
             foreach (var location in locations)
             {
-                var parts = location.PrimaryKey.SplitOnceFromLastIndexOf('/')
-                    .Select(SanitizeForCSharp)
-                    .Where(p => !string.IsNullOrWhiteSpace(p))
-                    .ToList();
-                var className = parts[0];
-                var variableName = parts.Count > 1 ? parts[1] : "Asset";
-
-                className = DontUseCSharpKeywords(className);
-                variableName = DontUseCSharpKeywords(variableName);
-
-                var fullNamespace = "RoR2BepInExPack.GameAssetPaths.Version_" + RoR2BepInExPack.PluginVersion.Replace(".", "_");
-                if (!namespaceToClass.TryGetValue(fullNamespace, out var classMap))
+                static void Add(
+                    string primaryKey, string guid, Type type,
+                    Dictionary<string, Dictionary<string, Dictionary<string, Dictionary<string, List<Type>>>>> namespaceToClass,
+                    Dictionary<string, string> guidToPath
+                )
                 {
-                    namespaceToClass[fullNamespace] = classMap = [];
+                    var parts = primaryKey.SplitOnceFromLastIndexOf('/')
+                        .Select(SanitizeForCSharp)
+                        .Where(p => !string.IsNullOrWhiteSpace(p))
+                        .ToList();
+                    var className = parts[0];
+                    var variableName = parts.Count > 1 ? parts[1] : "Asset";
+
+                    className = DontUseCSharpKeywords(className);
+                    variableName = DontUseCSharpKeywords(variableName);
+
+                    var fullNamespace = "RoR2BepInExPack.GameAssetPaths.Version_" + RoR2BepInExPack.PluginVersion.Replace(".", "_");
+                    if (!namespaceToClass.TryGetValue(fullNamespace, out var classMap))
+                    {
+                        namespaceToClass[fullNamespace] = classMap = [];
+                    }
+
+                    if (!classMap.TryGetValue(className, out var variableMap))
+                    {
+                        classMap[className] = variableMap = [];
+                    }
+
+                    if (!variableMap.TryGetValue(variableName, out var assetMap))
+                    {
+                        variableMap[variableName] = assetMap = [];
+                    }
+
+                    if (!assetMap.TryGetValue(guid, out var typesList))
+                    {
+                        assetMap[guid] = typesList = [];
+                    }
+                    if (!typesList.Contains(type))
+                        typesList.Add(type);
+
+                    guidToPath[guid] = primaryKey;
                 }
 
-                if (!classMap.TryGetValue(className, out var variableMap))
-                {
-                    classMap[className] = variableMap = [];
-                }
+                Add(location.PrimaryKey, guid, location.ResourceType, namespaceToClass, guidToPath);
 
-                if (!variableMap.TryGetValue(variableName, out var assetMap))
+                if (typeof(UnityEngine.Object).IsAssignableFrom(location.ResourceType) &&
+                    location.HasDependencies)
                 {
-                    variableMap[variableName] = assetMap = [];
-                }
+                    IResourceLocation assetBundleLocation = location.Dependencies.FirstOrDefault();
+                    if (assetBundleLocation != null && assetBundleLocation.ResourceType == typeof(IAssetBundleResource))
+                    {
+                        AssetBundle sourceAssetBundle = Addressables.LoadAssetAsync<IAssetBundleResource>(assetBundleLocation).
+                            WaitForCompletion().GetAssetBundle();
+                        if (sourceAssetBundle)
+                        {
+                            foreach (var subAsset in 
+                                    sourceAssetBundle.LoadAssetWithSubAssets(location.InternalId).Skip(1) /*skip first because first is main asset */)
+                            {
+                                string subAssetName = subAsset.name;
+                                var subAssetKey = location.PrimaryKey + "[" + subAssetName + "]";
+                                var subAssetGuid = guid + "[" + subAssetName + "]";
 
-                if (!assetMap.TryGetValue(guid, out var typesList))
-                {
-                    assetMap[guid] = typesList = [];
+                                Add(subAssetKey, subAssetGuid, subAsset.GetType(), namespaceToClass, guidToPath);
+                            }
+                        }
+                    }
                 }
-                typesList.Add(location.ResourceType);
             }
         }
 
@@ -108,6 +148,10 @@ internal static class GameAssetPathsGenerator
 
         Log.Error($"C# class generated at {Path.GetFullPath(outputPath)}");
 
+        var binaryOutputPath = Path.ChangeExtension(outputPath, ".bin");
+        GameAssetPathsSerde.Serialize(binaryOutputPath, guidToPath.Values.ToArray(), guidToPath.Keys.ToArray());
+        Log.Error($"Binary file generated at {Path.GetFullPath(binaryOutputPath)}");
+
         void WriteField(string types, string variable, string value)
         {
             sb.AppendLine($"        /// <summary>");
@@ -131,7 +175,7 @@ internal static class GameAssetPathsGenerator
             parts =
             [
                 key.Substring(0, lastSep),
-                    key.Substring(lastSep + 1)
+                key.Substring(lastSep + 1)
             ];
         }
 
