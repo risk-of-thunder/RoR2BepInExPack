@@ -19,12 +19,16 @@ readme = "../README.md"
 outdir = "./build"
 
 [[build.copy]]
+source = "../CHANGELOG.md"
+target = "CHANGELOG.md"
+
+[[build.copy]]
 source = "../src/ReleaseOutput"
 target = "./plugins/RoR2BepInExPack"
 
 [[build.copy]]
-source = "../CHANGELOG.md"
-target = "CHANGELOG.md"
+source = "../src/GameAssetPaths/GameAssetPaths.bin"
+target = "GameAssetPaths.bin"
 
 [[build.copy]]
 source = "../libs/Newtonsoft.Json.dll"
