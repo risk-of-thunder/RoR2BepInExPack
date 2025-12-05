@@ -20,6 +20,7 @@
 		<PackageReference Include="UnityEngine.Modules" Version="2021.3.33" />
 		<PackageReference Include="BepInEx.Core" Version="5.4.21" />
 		<PackageReference Include="RiskOfRain2.GameLibs" Version="*-*" />
+		<PackageReference Include="MonoDetour" Version="0.7.7" />
 	</ItemGroup>
 
 	<ItemGroup>
