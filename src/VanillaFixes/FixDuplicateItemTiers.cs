@@ -1,5 +1,4 @@
 ﻿using System;
-using HG;
 using MonoMod.RuntimeDetour;
 using RoR2;
 using RoR2.ContentManagement;
@@ -44,24 +43,32 @@ internal class FixDuplicateItemTiers
 
     private static void ReassignDuplicateTiers(Action orig)
     {
-        // please dont change this anymore gbx i beg of you
-        ItemTier realAssignedAtRuntime = (ItemTier)1000;
-
-        // stupid!
-        ItemTierDef foodTier = Addressables.LoadAssetAsync<ItemTierDef>(RoR2_DLC3.FoodTier_asset).WaitForCompletion();
-
-        foreach (ItemTierDef itemTierDef in ContentManager.itemTierDefs)
+        try
         {
-            // the hardcoding is insane but whatever man!
-            if (itemTierDef._tier >= (ItemTier)10 && itemTierDef._tier != realAssignedAtRuntime)
+            // please dont change this anymore gbx i beg of you
+            ItemTier realAssignedAtRuntime = (ItemTier)1000;
+
+            // stupid!
+            ItemTierDef foodTier = Addressables.LoadAssetAsync<ItemTierDef>(RoR2_DLC3.FoodTier_asset).WaitForCompletion();
+
+            foreach (ItemTierDef itemTierDef in ContentManager.itemTierDefs)
             {
-                // ensure food tier is placed correctly, yeet everything else
-                if (itemTierDef != foodTier)
+                // the hardcoding is insane but whatever man!
+                if (itemTierDef._tier >= (ItemTier)10 && itemTierDef._tier != realAssignedAtRuntime)
                 {
-                    itemTierDef._tier = realAssignedAtRuntime;
+                    // ensure food tier is placed correctly, yeet everything else
+                    if (itemTierDef != foodTier)
+                    {
+                        itemTierDef._tier = realAssignedAtRuntime;
+                    }
                 }
             }
         }
+        catch (Exception e )
+        {
+            Log.Error(e);
+        }
+        
         orig();
     }
 }
