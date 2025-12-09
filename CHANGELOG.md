@@ -1,6 +1,7 @@
 -   **1.40.0**
 
-    -  Fixed duplicate tier def overlaps.
+    -  Fix duplicate ItemTierDef overlaps.
+    -  Fix `lrapi_returns.json` not being included in the latest game build. It is highly recommended to not use it in the future and instead rely on the `GameAssetPathsSerde` class.
 
 -   **1.39.0**
 
@@ -13,7 +14,7 @@
 
 -   **1.37.0**
 
-	-   Removed obsolete vanilla fixes.
+	-   Remove obsolete vanilla fixes.
 
 -   **1.36.0**
 
@@ -21,11 +22,11 @@
 
 -   **1.35.0**
 
-    -   Added a new `GameAssetPaths` class for the DLC 3 release. Going forward, all modifications to game asset path definitions will be introduced as new iterations of this class within versioned namespaces to maintain backward compatibility. The latest changes, for example, are available under the `RoR2BepInExPack.GameAssetPaths.Version_1_35_0` namespace.
+    -   Add a new `GameAssetPaths` class for the DLC 3 release. Going forward, all modifications to game asset path definitions will be introduced as new iterations of this class within versioned namespaces to maintain backward compatibility. The latest changes, for example, are available under the `RoR2BepInExPack.GameAssetPaths.Version_1_35_0` namespace.
 
 -   **1.34.0**
 
-    -   Added missing paths to `GameAssetPathsBetter`.
+    -   Add missing paths to `GameAssetPathsBetter`.
 
 -   **1.33.0**
 
