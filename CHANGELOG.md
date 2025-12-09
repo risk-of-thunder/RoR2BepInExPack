@@ -1,3 +1,7 @@
+-   **1.40.0**
+
+    -  Fixed duplicate tier def overlaps.
+
 -   **1.39.0**
 
     -   Add a `GameAssetPaths` class that supports sub assets.

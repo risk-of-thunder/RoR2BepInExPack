@@ -15,7 +15,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
 {
     public const string PluginGUID = "___riskofthunder" + "." + PluginName;
     public const string PluginName = "RoR2BepInExPack";
-    public const string PluginVersion = "1.39.0";
+    public const string PluginVersion = "1.40.0";
 
     private void Awake()
     {
@@ -73,6 +73,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
         FixSystemInitializer.Init();
         FixRuleBookViewerStrip.Init();
         LogNetworkInvokeException.Init();
+        FixDuplicateItemTiers.Init();
 
         LegacyResourcesDetours.Init();
         LegacyShaderDetours.Init();
@@ -100,6 +101,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
         FixHasEffectiveAuthority.Enable();
         FixRuleBookViewerStrip.Enable();
         LogNetworkInvokeException.Enable();
+        FixDuplicateItemTiers.Enable();
 
         LegacyResourcesDetours.Enable();
         LegacyShaderDetours.Enable();
@@ -116,6 +118,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
         LegacyShaderDetours.Disable();
         LegacyResourcesDetours.Disable();
 
+        FixDuplicateItemTiers.Disable();
         LogNetworkInvokeException.Disable();
         FixHasEffectiveAuthority.Disable();
         FixDedicatedServerMaxPlayerCount.Disable();
@@ -143,6 +146,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
         LegacyShaderDetours.Destroy();
         LegacyResourcesDetours.Destroy();
 
+        FixDuplicateItemTiers.Destroy();
         LogNetworkInvokeException.Destroy();
         FixHasEffectiveAuthority.Destroy();
         FixDedicatedServerMaxPlayerCount.Destroy();
