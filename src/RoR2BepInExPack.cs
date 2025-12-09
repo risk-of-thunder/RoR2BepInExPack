@@ -27,6 +27,8 @@ public class RoR2BepInExPack : BaseUnityPlugin
 
         FrankenMonoPrintStackOverflowException.Init();
 
+        FixLRAPIReturns.Init(Info);
+
         InitHooks();
 
         Application.quitting += OnApplicationQuitting;
