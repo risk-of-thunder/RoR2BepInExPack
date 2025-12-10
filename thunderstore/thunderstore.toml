@@ -28,11 +28,11 @@ target = "./plugins/RoR2BepInExPack"
 
 [[build.copy]]
 source = "../src/GameAssetPaths/GameAssetPaths.bin"
-target = "GameAssetPaths.bin"
+target = "./plugins/RoR2BepInExPack/GameAssetPaths.bin"
 
 [[build.copy]]
 source = "../src/VanillaFixes/lrapi_returns.json"
-target = "lrapi_returns.json"
+target = "./plugins/RoR2BepInExPack/lrapi_returns.json"
 
 [[build.copy]]
 source = "../libs/Newtonsoft.Json.dll"
