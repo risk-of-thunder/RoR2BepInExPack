@@ -19,11 +19,18 @@ internal static class HookWatcher
 
     private static Hook _harmonyWatcher = null!;
 
-    private static bool isMonoDetourPresent;
+    private static bool _isMonoDetourPresent = false;
 
     internal static void Init()
     {
-        isMonoDetourPresent = Type.GetType("MonoDetour.MonoDetourHook, com.github.MonoDetour") is not null;
+        try
+        {
+            _isMonoDetourPresent = Type.GetType("MonoDetour.MonoDetourHook, com.github.MonoDetour")?.GetMethod("TryGetFrom") is not null;
+        }
+        catch (Exception e)
+        {
+            Log.Error(e);
+        }
 
         ModManager = new DetourModManager();
 
@@ -80,14 +87,14 @@ internal static class HookWatcher
     }
 
     private static void LogOnHook(Assembly hookOwner, MethodBase from, MethodBase to, object target)
-        => LogHookAndMaybeRedirect(new() { Kind = HookInfo.HookKind.On, Owner = hookOwner, OriginalManaged = from, HookMethodBase = to });
+        => LogHook(new() { Kind = HookInfo.HookKind.On, Owner = hookOwner, OriginalManaged = from, HookMethodBase = to });
 
     private static void LogILHook(Assembly hookOwner, MethodBase from, ILContext.Manipulator manipulator)
     {
-        if (isMonoDetourPresent && IfMonoDetourHookDoSpecializedLog(manipulator, from))
+        if (_isMonoDetourPresent && IfMonoDetourHookDoSpecializedLog(manipulator, from))
             return;
 
-        LogHookAndMaybeRedirect(new() { Kind = HookInfo.HookKind.IL, Owner = hookOwner, OriginalManaged = from, HookDelegate = manipulator });
+        LogHook(new() { Kind = HookInfo.HookKind.IL, Owner = hookOwner, OriginalManaged = from, HookDelegate = manipulator });
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
@@ -102,7 +109,7 @@ internal static class HookWatcher
         else
             applierTypeName = hook.ApplierType.Name;
 
-        LogHookAndMaybeRedirect(
+        LogHook(
             new() { Kind = HookInfo.HookKind.IL, Owner = hook.Manipulator.Module.Assembly, OriginalManaged = from, HookMethodBase = hook.Manipulator },
             specifier: $" MonoDetour<{applierTypeName}>"
         );
@@ -111,16 +118,16 @@ internal static class HookWatcher
     }
 
     private static void LogDetour(Assembly hookOwner, MethodBase from, MethodBase to)
-        => LogHookAndMaybeRedirect(new() { Kind = HookInfo.HookKind.On, Owner = hookOwner, OriginalManaged = from, HookMethodBase = to });
+        => LogHook(new() { Kind = HookInfo.HookKind.On, Owner = hookOwner, OriginalManaged = from, HookMethodBase = to });
 
     private static void LogNativeDetour(Assembly hookOwner, MethodBase originalMethod, IntPtr from, IntPtr to)
-        => LogHookAndMaybeRedirect(new() { Kind = HookInfo.HookKind.Native, Owner = hookOwner, OriginalNative = from, HookIntPtr = to });
+        => LogHook(new() { Kind = HookInfo.HookKind.Native, Owner = hookOwner, OriginalNative = from, HookIntPtr = to });
 
     private static bool LogHookAdd(MethodBase from, Delegate to)
     {
         var info = GetHookInfo(from, to);
 
-        return LogHookAndMaybeRedirect(info);
+        return LogHook(info);
     }
 
     private static bool LogHookModify(MethodBase from, Delegate to)
@@ -128,14 +135,14 @@ internal static class HookWatcher
         var info = GetHookInfo(from, to);
 
         // Seems to be only used by IL Manipulators?
-        return LogHookAndMaybeRedirect(info, "modifier");
+        return LogHook(info, "modifier");
     }
 
     private static bool LogHookRemove(MethodBase from, Delegate to)
     {
         var info = GetHookInfo(from, to);
 
-        return LogHookAndMaybeRedirect(info, "removed");
+        return LogHook(info, "removed");
     }
 
     private static HookInfo GetHookInfo(MethodBase from, Delegate to)
@@ -182,7 +189,7 @@ internal static class HookWatcher
     }
 
     internal static bool RedirectFixFrameRateDependantLogicHooks = false;
-    private static bool LogHookAndMaybeRedirect(HookInfo hookInfo, string context = "added", string? specifier = null)
+    private static bool LogHook(HookInfo hookInfo, string context = "added", string? specifier = null)
     {
         if (hookInfo.OriginalManaged == null)
         {
