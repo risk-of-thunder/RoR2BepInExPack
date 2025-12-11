@@ -1,7 +1,9 @@
 ﻿using System;
 using System.IO;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using HarmonyLib;
+using MonoDetour;
 using MonoMod.Cil;
 using MonoMod.RuntimeDetour;
 using MonoMod.RuntimeDetour.HookGen;
@@ -9,14 +11,27 @@ using RoR2BepInExPack.Reflection;
 
 namespace RoR2BepInExPack;
 
+#nullable enable
+
 internal static class HookWatcher
 {
-    private static DetourModManager ModManager { get; set; }
+    private static DetourModManager ModManager { get; set; } = null!;
 
-    private static Hook _harmonyWatcher;
+    private static Hook _harmonyWatcher = null!;
+
+    private static bool _isMonoDetourPresent = false;
 
     internal static void Init()
     {
+        try
+        {
+            _isMonoDetourPresent = Type.GetType("MonoDetour.MonoDetourHook, com.github.MonoDetour")?.GetMethod("TryGetFrom") is not null;
+        }
+        catch (Exception e)
+        {
+            Log.Error(e);
+        }
+
         ModManager = new DetourModManager();
 
         ModManager.OnHook += LogOnHook;
@@ -68,26 +83,51 @@ internal static class HookWatcher
         ModManager.OnHook -= LogOnHook;
 
         ModManager.Dispose();
-        ModManager = null;
+        ModManager = null!;
     }
 
     private static void LogOnHook(Assembly hookOwner, MethodBase from, MethodBase to, object target)
-        => LogHookAndMaybeRedirect(new() { Kind = HookInfo.HookKind.On, Owner = hookOwner, OriginalManaged = from, HookMethodBase = to });
+        => LogHook(new() { Kind = HookInfo.HookKind.On, Owner = hookOwner, OriginalManaged = from, HookMethodBase = to });
 
     private static void LogILHook(Assembly hookOwner, MethodBase from, ILContext.Manipulator manipulator)
-        => LogHookAndMaybeRedirect(new() { Kind = HookInfo.HookKind.IL, Owner = hookOwner, OriginalManaged = from, HookDelegate = manipulator });
+    {
+        if (_isMonoDetourPresent && IfMonoDetourHookDoSpecializedLog(manipulator, from))
+            return;
+
+        LogHook(new() { Kind = HookInfo.HookKind.IL, Owner = hookOwner, OriginalManaged = from, HookDelegate = manipulator });
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    static bool IfMonoDetourHookDoSpecializedLog(ILContext.Manipulator manipulator, MethodBase from)
+    {
+        if (!MonoDetourHook.TryGetFrom(manipulator, out var hook))
+            return false;
+
+        string applierTypeName;
+        if (hook.ApplierType.Name.EndsWith("Detour", StringComparison.InvariantCulture))
+            applierTypeName = hook.ApplierType.Name[..^6];
+        else
+            applierTypeName = hook.ApplierType.Name;
+
+        LogHook(
+            new() { Kind = HookInfo.HookKind.IL, Owner = hook.Manipulator.Module.Assembly, OriginalManaged = from, HookMethodBase = hook.Manipulator },
+            specifier: $" MonoDetour<{applierTypeName}>"
+        );
+
+        return true;
+    }
 
     private static void LogDetour(Assembly hookOwner, MethodBase from, MethodBase to)
-        => LogHookAndMaybeRedirect(new() { Kind = HookInfo.HookKind.On, Owner = hookOwner, OriginalManaged = from, HookMethodBase = to });
+        => LogHook(new() { Kind = HookInfo.HookKind.On, Owner = hookOwner, OriginalManaged = from, HookMethodBase = to });
 
     private static void LogNativeDetour(Assembly hookOwner, MethodBase originalMethod, IntPtr from, IntPtr to)
-        => LogHookAndMaybeRedirect(new() { Kind = HookInfo.HookKind.Native, Owner = hookOwner, OriginalNative = from, HookIntPtr = to });
+        => LogHook(new() { Kind = HookInfo.HookKind.Native, Owner = hookOwner, OriginalNative = from, HookIntPtr = to });
 
     private static bool LogHookAdd(MethodBase from, Delegate to)
     {
         var info = GetHookInfo(from, to);
 
-        return LogHookAndMaybeRedirect(info);
+        return LogHook(info);
     }
 
     private static bool LogHookModify(MethodBase from, Delegate to)
@@ -95,14 +135,14 @@ internal static class HookWatcher
         var info = GetHookInfo(from, to);
 
         // Seems to be only used by IL Manipulators?
-        return LogHookAndMaybeRedirect(info, "modifier");
+        return LogHook(info, "modifier");
     }
 
     private static bool LogHookRemove(MethodBase from, Delegate to)
     {
         var info = GetHookInfo(from, to);
 
-        return LogHookAndMaybeRedirect(info, "removed");
+        return LogHook(info, "removed");
     }
 
     private static HookInfo GetHookInfo(MethodBase from, Delegate to)
@@ -138,18 +178,18 @@ internal static class HookWatcher
 
         internal HookKind Kind;
 
-        internal Assembly Owner;
+        internal Assembly? Owner;
 
-        internal MethodBase OriginalManaged;
+        internal MethodBase? OriginalManaged;
         internal IntPtr OriginalNative;
 
-        internal Delegate HookDelegate;
+        internal Delegate? HookDelegate;
         internal IntPtr HookIntPtr;
-        internal MethodBase HookMethodBase;
+        internal MethodBase? HookMethodBase;
     }
 
     internal static bool RedirectFixFrameRateDependantLogicHooks = false;
-    private static bool LogHookAndMaybeRedirect(HookInfo hookInfo, string context = "added")
+    private static bool LogHook(HookInfo hookInfo, string context = "added", string? specifier = null)
     {
         if (hookInfo.OriginalManaged == null)
         {
@@ -167,7 +207,7 @@ internal static class HookWatcher
         var fromName = hookInfo.OriginalManaged.Name;
         var fromIdentifier = fromDeclaringType != null ? $"{fromDeclaringType.FullName}.{fromName}" : fromName;
 
-        string GetToIdentifier()
+        string? GetToIdentifier()
         {
             if (hookInfo.HookDelegate != null)
             {
@@ -186,7 +226,7 @@ internal static class HookWatcher
             return "";
         }
 
-        Log.Debug($"{hookInfo.Kind}Hook {GetToIdentifier()} {context} by assembly: {hookOwnerDllName} for: {fromIdentifier}");
+        Log.Debug($"{hookInfo.Kind}Hook{specifier} {GetToIdentifier()} {context} by assembly: {hookOwnerDllName} for: {fromIdentifier}");
 
         return true;
     }
