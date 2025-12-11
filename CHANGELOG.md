@@ -1,3 +1,7 @@
+-   **1.42.0**
+
+    -  HookWatcher now properly log MonoDetour hooks.
+
 -   **1.41.0**
 
     -  Fix `lrapi_returns.json` and `GameAssetPaths.bin` not being next to the dll.
