@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using RoR2BepInExPack.GameAssetPaths.Version_1_39_0;
@@ -18,7 +19,9 @@ internal static class GameAssetPathsGenerator
 {
     internal static void Init()
     {
-        var outputPath = "GameAssetPaths.cs";
+        const string namespacename = "RoR2BepInExPack.GameAssetPathsBetter";
+        const string outputPathCs = "GameAssetPathsBetter.cs";
+        const string outputPathBin = "GameAssetPaths.bin";
         var guidRegex = new Regex("^[0-9a-f]{32}$", RegexOptions.Compiled);
 
         var locator = Addressables.ResourceLocators.FirstOrDefault(l => l.LocatorId == "AddressablesMainContentCatalog") as ResourceLocationMap;
@@ -57,10 +60,9 @@ internal static class GameAssetPathsGenerator
                     className = DontUseCSharpKeywords(className);
                     variableName = DontUseCSharpKeywords(variableName);
 
-                    var fullNamespace = "RoR2BepInExPack.GameAssetPaths.Version_" + RoR2BepInExPack.PluginVersion.Replace(".", "_");
-                    if (!namespaceToClass.TryGetValue(fullNamespace, out var classMap))
+                    if (!namespaceToClass.TryGetValue(namespacename, out var classMap))
                     {
-                        namespaceToClass[fullNamespace] = classMap = [];
+                        namespaceToClass[namespacename] = classMap = [];
                     }
 
                     if (!classMap.TryGetValue(className, out var variableMap))
@@ -95,7 +97,7 @@ internal static class GameAssetPathsGenerator
                             WaitForCompletion().GetAssetBundle();
                         if (sourceAssetBundle)
                         {
-                            foreach (var subAsset in 
+                            foreach (var subAsset in
                                     sourceAssetBundle.LoadAssetWithSubAssets(location.InternalId).Skip(1) /*skip first because first is main asset */)
                             {
                                 string subAssetName = subAsset.name;
@@ -110,15 +112,35 @@ internal static class GameAssetPathsGenerator
             }
         }
 
+        var namespaceToClassPrev = new Dictionary<string, Dictionary<string, Dictionary<string, FieldInfo>>>();
+        namespaceToClassPrev.Add(namespacename, Assembly.GetExecutingAssembly().GetTypes()
+            .Where(t => t.Namespace == namespacename)
+            .ToDictionary(t => t.Name, t => t.GetFields()
+                .ToDictionary(f => f.Name)));
+
         var sb = new StringBuilder();
+        sb.AppendLine("using System;");
+        sb.AppendLine("using System.ComponentModel;").AppendLine();
         sb.AppendLine("#pragma warning disable CS1591");
+
         foreach (var (ns, classData) in namespaceToClass.OrderBy(e => e.Key))
         {
+            namespaceToClassPrev.TryGetValue(ns, out var classDataPrev);
+            {
+                namespaceToClassPrev.Remove(ns);
+            }
+
             sb.AppendLine($"namespace {ns}");
             sb.AppendLine("{");
 
             foreach (var (className, variableData) in classData.OrderBy(e => e.Key))
             {
+                Dictionary<string, FieldInfo> fieldDataPrev = null;
+                if (classDataPrev?.TryGetValue(className, out fieldDataPrev) == true)
+                {
+                    classDataPrev.Remove(className);
+                }
+
                 sb.AppendLine($"    public static class {className}");
                 sb.AppendLine("    {");
                 foreach (var (variable, assets) in variableData.OrderBy(e => e.Key))
@@ -127,16 +149,45 @@ internal static class GameAssetPathsGenerator
                     {
                         foreach (var asset in assets.OrderBy(e => e.Key))
                         {
-                            WriteField(string.Join(", ", asset.Value.Select(t => t.FullName)), $"{variable}_{asset.Key[..8]}", asset.Key);
+                            string fieldname = $"{variable}_{asset.Key[..8]}";
+                            WriteField(string.Join(", ", asset.Value.Select(t => t.FullName)), fieldname, asset.Key, false);
+                            fieldDataPrev?.Remove(fieldname);
                         }
                     }
                     else
                     {
                         var asset = assets.First();
-                        WriteField(string.Join(", ", asset.Value.Select(t => t.FullName)), variable, asset.Key);
+                        WriteField(string.Join(", ", asset.Value.Select(t => t.FullName)), variable, asset.Key, false);
+                        fieldDataPrev?.Remove(variable);
                     }
                 }
+
+                // fields remaining in fieldDataPrev no longer exist, mark obsolete
+                if (fieldDataPrev != null)
+                {
+                    foreach (var (fieldname, fieldinfo) in fieldDataPrev.OrderBy(a => a.Key))
+                    {
+                        WriteField(null, fieldname, (string)fieldinfo.GetValue(null), true);
+                    }
+                }
+
                 sb.AppendLine("    }");
+            }
+
+            // classes remaining in classDataPrev no longer exist, mark obsolete
+            if (classDataPrev != null)
+            {
+                foreach (var (classname, fieldDataPrev) in classDataPrev.OrderBy(a => a.Key))
+                {
+                    sb.AppendLine("    [Obsolete(\"No longer contains valid asset paths.\"), EditorBrowsable(EditorBrowsableState.Never)]");
+                    sb.AppendLine("    public static class " + classname);
+                    sb.AppendLine("    {");
+                    foreach (var (fieldname, fieldinfo) in fieldDataPrev.OrderBy(a => a.Key))
+                    {
+                        WriteField(null, fieldname, (string)fieldinfo.GetValue(null), true);
+                    }
+                    sb.AppendLine("    }");
+                }
             }
 
             sb.AppendLine("}");
@@ -144,20 +195,26 @@ internal static class GameAssetPathsGenerator
 
         sb.AppendLine("#pragma warning restore CS1591");
 
-        File.WriteAllText(outputPath, sb.ToString());
+        File.WriteAllText(outputPathCs, sb.ToString());
 
-        Log.Error($"C# class generated at {Path.GetFullPath(outputPath)}");
+        Log.Error($"C# class generated at {Path.GetFullPath(outputPathCs)}");
 
-        var binaryOutputPath = Path.ChangeExtension(outputPath, ".bin");
-        GameAssetPathsSerde.Serialize(binaryOutputPath, guidToPath.Values.ToArray(), guidToPath.Keys.ToArray());
-        Log.Error($"Binary file generated at {Path.GetFullPath(binaryOutputPath)}");
+        GameAssetPathsSerde.Serialize(outputPathBin, guidToPath.Values.ToArray(), guidToPath.Keys.ToArray());
+        Log.Error($"Binary file generated at {Path.GetFullPath(outputPathBin)}");
 
-        void WriteField(string types, string variable, string value)
+        void WriteField(string types, string variable, string value, bool addObsolete)
         {
-            sb.AppendLine($"        /// <summary>");
-            sb.AppendLine($"        /// {types}");
-            sb.AppendLine($"        /// </summary>");
-            sb.AppendLine($"        public static string {variable} = \"{value}\";");
+            if (types != null)
+            {
+                sb.AppendLine($"        /// <summary>");
+                sb.AppendLine($"        /// {types}");
+                sb.AppendLine($"        /// </summary>");
+            }
+            if (addObsolete)
+            {
+                sb.AppendLine("        [Obsolete(\"Asset no longer exists or was moved.\"), EditorBrowsable(EditorBrowsableState.Never)]");
+            }
+            sb.AppendLine($"        public static readonly string {variable} = \"{value}\";");
         }
     }
 
