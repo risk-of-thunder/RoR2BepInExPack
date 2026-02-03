@@ -1,6 +1,7 @@
 -   **1.42.0**
 
     -  HookWatcher now properly log MonoDetour hooks.
+    -  Changes to the `GameAssetPaths` generator have been made once again. Going forward, **only `GameAssetPathsBetter` should be used**, and the versioned `GameAssetPaths` iteration introduced in **1.35.0 is now considered obsolete and should be discarded**. Removed asset paths are preserved as *hidden obsolete fields* instead of generating a new namespace with ~50,000 fields on every update. Legacy path namespaces (such as `GameAssetPath` Version `1_35_0`) are now hidden.
 
 -   **1.41.0**
 
