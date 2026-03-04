@@ -1,3 +1,7 @@
+-   **1.43.0**
+
+    - Optimize `SaferAchievementManager` to reduce load times.
+
 -   **1.42.0**
 
     -  HookWatcher now properly log MonoDetour hooks.
