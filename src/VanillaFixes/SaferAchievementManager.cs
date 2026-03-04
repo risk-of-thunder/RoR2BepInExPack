@@ -15,6 +15,11 @@ namespace RoR2BepInExPack.VanillaFixes;
 // SaferAchievementManager SystemInitializer method use GetTypes
 // on every assembly of the appdomain without handling type loading exceptions.
 // Also add convenient action event in the method for easy addition of defs
+// Additionally the achievement manager code has been optimized to improve performance:
+// * Don't scan MMHOOK generated assemblies or the RoR2BepInExPack assembly; these have lots of types but never have achievements
+// * Only scan assemblies that reference RoR2 (so the Unity libraries and similar are ignored)
+// * IMPORTANT: Don't yield after every single type. Instead we yield each time a certain number of achievements have been found
+// * Don't yield at the end of the method, either
 public class SaferAchievementManager
 {
     private static Hook _hook;
@@ -68,8 +73,9 @@ public class SaferAchievementManager
         _hook.Free();
     }
 
-    // this is the original method 1:1 except GetTypes and GetCustomAttributes is safely wrapped
-    // additional events are added for mod creators
+    // this is the original method with GetTypes and GetCustomAttributes safely wrapped, and:
+    // * additional events are added for mod creators
+    // * performance optimizations are applied (see comments on this class)
     // orig is not called
     private static IEnumerator SaferCollectAchievementDefs(Dictionary<string, AchievementDef> achievementIdentifierToDef)
     {
@@ -77,18 +83,27 @@ public class SaferAchievementManager
         achievementIdentifierToDef.Clear();
         var assemblies = new List<Assembly>();
 
-        if (RoR2Application.isModded)
+        Assembly ror2BepInExPackAssembly = typeof(RoR2BepInExPack).Assembly;
+        Assembly ror2Assembly = typeof(BaseAchievement).Assembly;
+        assemblies.Add(ror2Assembly);
+        string ror2AssemblyName = ror2Assembly.GetName().Name;
+        foreach (var item in AppDomain.CurrentDomain.GetAssemblies())
         {
-            foreach (var item in AppDomain.CurrentDomain.GetAssemblies())
+            if (item.GetName().Name.StartsWith("MMHOOK_") || item == ror2BepInExPackAssembly)
             {
-                assemblies.Add(item);
+                continue;
+            }
+            foreach (var referenceAssemblyName in item.GetReferencedAssemblies())
+            {
+                if (referenceAssemblyName.Name == ror2AssemblyName)
+                {
+                    assemblies.Add(item);
+                    break;
+                }
             }
         }
-        else
-        {
-            assemblies.Add(typeof(BaseAchievement).Assembly);
-        }
 
+        int typesProcessedThisFrame = 0;
         foreach (var assembly in assemblies)
         {
             var assemblyTypes = assembly.GetTypes();
@@ -170,9 +185,14 @@ public class SaferAchievementManager
                             }));
                         }
                     }
+                    // yield every once in a while to keep the framerate steady
+                    const int MAX_TYPES_PROCESSED_PER_FRAME = 100;
+                    if (++typesProcessedThisFrame > MAX_TYPES_PROCESSED_PER_FRAME)
+                    {
+                        typesProcessedThisFrame = 0;
+                        yield return null;
+                    }
                 }
-
-                yield return null;
             }
         }
 
@@ -212,8 +232,5 @@ public class SaferAchievementManager
 
         var onAchievementsRegistered = (Action)_achievementManagerOnAchievementsRegisteredFieldInfo.GetValue(null);
         onAchievementsRegistered?.Invoke();
-
-        yield return null;
-        yield break;
     }
 }
