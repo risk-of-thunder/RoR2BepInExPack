@@ -2,7 +2,7 @@
 
     -  Updated `GameAssetPathsBetter` for DLC4
     -  Fixed Duplicate ItemTierDef hook.
-
+    -  Updated modded ConVars to be case insentitive.
 
 -   **1.43.0**
 

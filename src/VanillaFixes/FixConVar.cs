@@ -84,7 +84,7 @@ internal static class FixConVar
     {
         var self = RoR2.Console.instance;
 
-        self.allConVars = new();
+        self.allConVars = new Dictionary<string, BaseConVar>(StringComparer.InvariantCultureIgnoreCase);
         self.archiveConVars = new();
 
         var assTypes = new List<Type>();
