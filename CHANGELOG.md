@@ -1,5 +1,9 @@
 -   **1.44.0**
 
+    -  Fixed DLC achievements using default icon.
+
+-   **1.44.0**
+
     -  Updated `GameAssetPathsBetter` for DLC4
     -  Fixed Duplicate ItemTierDef hook.
     -  Updated modded ConVars to be case insentitive.
