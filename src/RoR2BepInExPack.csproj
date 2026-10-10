@@ -17,14 +17,14 @@
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="UnityEngine.Modules" Version="2021.3.33" />
+		<PackageReference Include="UnityEngine.Modules" Version="2021.3.45" />
 		<PackageReference Include="BepInEx.Core" Version="5.4.21" />
 		<PackageReference Include="RiskOfRain2.GameLibs" Version="*-*" />
 		<PackageReference Include="MonoDetour" Version="0.7.7" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include=" Krafs.Publicizer" Version="*" PrivateAssets="all" />
+		<PackageReference Include=" Krafs.Publicizer" Version="2.3.0" PrivateAssets="all" />
 
 		<!-- Publicize by assembly name -->
 		<Publicize Include="HGUnityUtils" />
