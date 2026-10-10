@@ -9,6 +9,7 @@ using RoR2;
 using RoR2.Achievements;
 using RoR2BepInExPack.Reflection;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 
 namespace RoR2BepInExPack.VanillaFixes;
 
@@ -152,17 +153,19 @@ public class SaferAchievementManager
                             descriptionToken = "ACHIEVEMENT_" + registerAchievementAttribute.identifier.ToUpper(CultureInfo.InvariantCulture) + "_DESCRIPTION",
                             type = type,
                             serverTrackerType = registerAchievementAttribute.serverTrackerType,
-                            lunarCoinReward = registerAchievementAttribute.lunarCoinReward
+                            lunarCoinReward = registerAchievementAttribute.lunarCoinReward,
+                            silent = registerAchievementAttribute.silent,
                         };
 
-                        if (unlockableDef && unlockableDef.achievementIcon)
+                        if (unlockableDef && unlockableDef.HasValidIcon)
                         {
                             achievementDef.SetAchievedIcon(unlockableDef.achievementIcon);
+                            achievementDef.iconReference = unlockableDef.achievementIconRef;
                         }
                         else
                         {
                             achievementDef.iconPath = "Textures/AchievementIcons/tex" + registerAchievementAttribute.identifier + "Icon";
-                            achievementDef.PreloadIcon();
+                            achievementDef.iconReference = new AssetReferenceT<Sprite>(LegacyResourcesAPI.GetPathGuidString(achievementDef.iconPath));
                         }
 
                         AchievementManager.achievementIdentifiers.Add(registerAchievementAttribute.identifier);
