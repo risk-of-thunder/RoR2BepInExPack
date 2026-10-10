@@ -1,5 +1,6 @@
--   **1.44.2**
+-   **1.45.0**
 
+    -  Modify `KarmaManager.BuildKarmaTriggers` to be more safe and reduce load times. Mods wishing to register custom karma triggers with the `RegisterKarmaTrigger` attribute should add the `SearchableAttribute.OptIn` attribute to their assembly.
     -  Remove `FixNonLethalOneHP` fix because it is no longer needed.
 
 -   **1.44.1**
