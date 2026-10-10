@@ -1,3 +1,7 @@
+-   **1.44.2**
+
+    -  Remove `FixNonLethalOneHP` fix because it is no longer needed.
+
 -   **1.44.1**
 
     -  Fixed DLC achievements using default icon.
