@@ -1,3 +1,7 @@
+-  **1.45.0**
+
+    -  Fixed achievement icons always showing as default
+
 -   **1.44.0**
 
     -  Updated `GameAssetPathsBetter` for DLC4
