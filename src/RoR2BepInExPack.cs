@@ -15,7 +15,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
 {
     public const string PluginGUID = "___riskofthunder" + "." + PluginName;
     public const string PluginName = "RoR2BepInExPack";
-    public const string PluginVersion = "1.44.1";
+    public const string PluginVersion = "1.44.2";
 
     private void Awake()
     {
@@ -68,7 +68,6 @@ public class RoR2BepInExPack : BaseUnityPlugin
         FixExtraGameModesMenu.Init();
         SaferWWise.Init();
         FixNullEntitlement.Init();
-        FixNonLethalOneHP.Init();
         FixRunScaling.Init();
         FixDedicatedServerMaxPlayerCount.Init();
         FixHasEffectiveAuthority.Init();
@@ -97,7 +96,6 @@ public class RoR2BepInExPack : BaseUnityPlugin
         FixExtraGameModesMenu.Enable();
         SaferWWise.Enable();
         FixNullEntitlement.Enable();
-        FixNonLethalOneHP.Enable();
         FixRunScaling.Enable();
         FixDedicatedServerMaxPlayerCount.Enable();
         FixHasEffectiveAuthority.Enable();
@@ -125,7 +123,6 @@ public class RoR2BepInExPack : BaseUnityPlugin
         FixHasEffectiveAuthority.Disable();
         FixDedicatedServerMaxPlayerCount.Disable();
         FixRunScaling.Disable();
-        FixNonLethalOneHP.Disable();
         FixNullEntitlement.Disable();
         SaferWWise.Disable();
         FixExtraGameModesMenu.Disable();
@@ -153,7 +150,6 @@ public class RoR2BepInExPack : BaseUnityPlugin
         FixHasEffectiveAuthority.Destroy();
         FixDedicatedServerMaxPlayerCount.Destroy();
         FixRunScaling.Destroy();
-        FixNonLethalOneHP.Destroy();
         FixNullEntitlement.Destroy();
         SaferWWise.Destroy();
         FixExtraGameModesMenu.Destroy();
