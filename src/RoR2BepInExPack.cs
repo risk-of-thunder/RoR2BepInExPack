@@ -76,6 +76,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
         LogNetworkInvokeException.Init();
         FixDuplicateItemTiers.Init();
         ModifiedKarmaManager.Init();
+        FixMultiplayerCompatibilityWithVanilla.Init();
 
         LegacyResourcesDetours.Init();
         LegacyShaderDetours.Init();
@@ -104,6 +105,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
         LogNetworkInvokeException.Enable();
         FixDuplicateItemTiers.Enable();
         ModifiedKarmaManager.Enable();
+        FixMultiplayerCompatibilityWithVanilla.Enable();
 
         LegacyResourcesDetours.Enable();
         LegacyShaderDetours.Enable();
@@ -120,6 +122,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
         LegacyShaderDetours.Disable();
         LegacyResourcesDetours.Disable();
 
+        FixMultiplayerCompatibilityWithVanilla.Disable();
         ModifiedKarmaManager.Disable();
         FixDuplicateItemTiers.Disable();
         LogNetworkInvokeException.Disable();
@@ -148,6 +151,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
         LegacyShaderDetours.Destroy();
         LegacyResourcesDetours.Destroy();
 
+        FixMultiplayerCompatibilityWithVanilla.Destroy();
         ModifiedKarmaManager.Destroy();
         FixDuplicateItemTiers.Destroy();
         LogNetworkInvokeException.Destroy();
