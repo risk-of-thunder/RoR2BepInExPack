@@ -1,3 +1,8 @@
+-   **1.46.0**
+
+    -  Prevent JunkContent from automatically loading additional assets in modded games, preserving multiplayer compatibility with vanilla game instances.
+    -  Deprecate GameAssetPaths.Version_1_39_0 with Obsolete and EditorBrowsable attributes. Like said in previous changelogs only `GameAssetPathsBetter` should be used.
+
 -   **1.45.0**
 
     -  Modify `KarmaManager.BuildKarmaTriggers` to be more safe and reduce load times. Mods wishing to register custom karma triggers with the `RegisterKarmaTrigger` attribute should add the `SearchableAttribute.OptIn` attribute to their assembly.
