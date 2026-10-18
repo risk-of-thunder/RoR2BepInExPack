@@ -1,3 +1,7 @@
+-   **1.47.0**
+
+    -  Fix `EliteOnlyArtifactManager` breaking if it is referenced before content is loaded.
+
 -   **1.46.0**
 
     -  Prevent JunkContent from automatically loading additional assets in modded games, preserving multiplayer compatibility with vanilla game instances.
