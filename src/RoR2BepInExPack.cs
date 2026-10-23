@@ -15,7 +15,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
 {
     public const string PluginGUID = "___riskofthunder" + "." + PluginName;
     public const string PluginName = "RoR2BepInExPack";
-    public const string PluginVersion = "1.47.0";
+    public const string PluginVersion = "1.48.0";
 
     private void Awake()
     {
@@ -198,5 +198,17 @@ public class RoR2BepInExPack : BaseUnityPlugin
                 Log.Error(ex);
             }
         }
+    }
+
+    /// <summary>
+    /// Load all content from JunkContent. This makes us vanilla incompatible.
+    /// </summary>
+    public static void LoadJunkContent()
+    {
+        if (FixMultiplayerCompatibilityWithVanilla.loadAll == false)
+        {
+            Log.Info("Loading all of JunkContent.");
+        }
+        FixMultiplayerCompatibilityWithVanilla.loadAll = true;
     }
 }
