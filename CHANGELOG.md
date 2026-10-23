@@ -1,3 +1,8 @@
+
+-   **1.48.0**
+
+    -  Add `LoadJunkContent` public method to restore the old functionality of loading it all. At least one mod must call this for this to take effect.
+
 -   **1.47.0**
 
     -  Fix `EliteOnlyArtifactManager` breaking if it is referenced before content is loaded.

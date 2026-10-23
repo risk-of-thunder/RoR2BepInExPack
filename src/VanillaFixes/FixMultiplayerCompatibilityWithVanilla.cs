@@ -8,9 +8,11 @@ namespace RoR2BepInExPack.VanillaFixes;
 // Fixes CanLoadType so JunkContent doesn't load additional assets in modded games by default.
 // Loading these extra assets break multiplayer compatibility with vanilla game instances.
 // Mods that need this content can load it explicitly via Addressables.Load.
+// Alternatively, loadAll can be used to restore the old behavior of all loading all assets and registering them in their respective catalogs.
 internal static class FixMultiplayerCompatibilityWithVanilla
 {
     private static Hook _hook;
+    internal static bool loadAll = false;
 
     internal static void Init()
     {
@@ -40,7 +42,7 @@ internal static class FixMultiplayerCompatibilityWithVanilla
     {
         if (contentPack.loadOnlyExplicitTypes.Count >= 1)
         {
-            return contentPack.loadOnlyExplicitTypes.Contains(_type);
+            return loadAll || contentPack.loadOnlyExplicitTypes.Contains(_type);
         }
 
         return true;
