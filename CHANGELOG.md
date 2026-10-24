@@ -1,3 +1,7 @@
+-   **1.49.0**
+
+    -  Fix every remaining instance of ALL assemblies being loaded (`PostProcessManager` and `VolumeManager`).
+    -  Optimize the `EntityStateCatalog` to reduce load times.
 
 -   **1.48.0**
 

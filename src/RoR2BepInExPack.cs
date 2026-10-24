@@ -15,7 +15,7 @@ public class RoR2BepInExPack : BaseUnityPlugin
 {
     public const string PluginGUID = "___riskofthunder" + "." + PluginName;
     public const string PluginName = "RoR2BepInExPack";
-    public const string PluginVersion = "1.48.0";
+    public const string PluginVersion = "1.49.0";
 
     private void Awake()
     {
@@ -81,6 +81,9 @@ public class RoR2BepInExPack : BaseUnityPlugin
         FixDuplicateItemTiers.Init();
         ModifiedKarmaManager.Init();
         FixMultiplayerCompatibilityWithVanilla.Init();
+        FixVolumeManager.Init();
+        FixPostProcessManager.Init();
+        FixEntityStateCatalog.Init();
 
         LegacyResourcesDetours.Init();
         LegacyShaderDetours.Init();
@@ -110,6 +113,9 @@ public class RoR2BepInExPack : BaseUnityPlugin
         FixDuplicateItemTiers.Enable();
         ModifiedKarmaManager.Enable();
         FixMultiplayerCompatibilityWithVanilla.Enable();
+        FixVolumeManager.Enable();
+        FixPostProcessManager.Enable();
+        FixEntityStateCatalog.Enable();
 
         LegacyResourcesDetours.Enable();
         LegacyShaderDetours.Enable();
@@ -126,6 +132,9 @@ public class RoR2BepInExPack : BaseUnityPlugin
         LegacyShaderDetours.Disable();
         LegacyResourcesDetours.Disable();
 
+        FixEntityStateCatalog.Disable();
+        FixPostProcessManager.Disable();
+        FixVolumeManager.Disable();
         FixMultiplayerCompatibilityWithVanilla.Disable();
         ModifiedKarmaManager.Disable();
         FixDuplicateItemTiers.Disable();
@@ -155,6 +164,9 @@ public class RoR2BepInExPack : BaseUnityPlugin
         LegacyShaderDetours.Destroy();
         LegacyResourcesDetours.Destroy();
 
+        FixEntityStateCatalog.Destroy();
+        FixPostProcessManager.Destroy();
+        FixVolumeManager.Destroy();
         FixMultiplayerCompatibilityWithVanilla.Destroy();
         ModifiedKarmaManager.Destroy();
         FixDuplicateItemTiers.Destroy();
