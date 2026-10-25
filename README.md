@@ -9,6 +9,7 @@ We are constantly monitoring the game's updates and making changes to this proje
 Our current scope includes:
 - Make sure that the code does not hinder or complicate modding efforts beyond what is necessary.
 - Improving compatibility between mods.
+- Improving the performance and stability of the game.
 
 We appreciate any feedback or suggestions from the community to help us make it the best it can be.
 
