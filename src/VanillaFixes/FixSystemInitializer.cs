@@ -73,7 +73,15 @@ internal class FixSystemInitializer
                 }
                 continue;
             }
-            IEnumerator thisStep = initializerAttribute2.methodInfo.Invoke(null, Array.Empty<object>()) as IEnumerator;
+            IEnumerator thisStep = null;
+            try
+            {
+                thisStep = initializerAttribute2.methodInfo.Invoke(null, Array.Empty<object>()) as IEnumerator;
+            }
+            catch (Exception ex)
+            {
+                throw new TargetInvocationException($"Error in invoking SystemInitializer for {initializerAttribute2.associatedType.FullName}.{initializerAttribute2.methodInfo.Name}", ex);
+            }
             List<IEnumerator> coroutineStack = new List<IEnumerator> { thisStep };
             multiLoopTimer.Stop();
             long accumulatedTime = multiLoopTimer.ElapsedMilliseconds;

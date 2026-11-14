@@ -1,3 +1,7 @@
+-   **1.50.0**
+
+    - Add better logging when a method that crashes on start-up does not appear on the stack trace.
+
 -   **1.49.0**
 
     -  Fix every remaining instance of ALL assemblies being loaded (`PostProcessManager` and `VolumeManager`).
