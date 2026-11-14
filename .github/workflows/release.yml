@@ -61,7 +61,7 @@ jobs:
         dotnet pack --configuration Release /p:PackageOutputPath=./ReleaseOutput /p:OutputPath=./ReleaseOutput
 
         if [ "${{ github.event.inputs.skip_nuget }}" != 'true' ]; then
-          dotnet nuget push ./src/ReleaseOutput/*.nupkg --api-key "${{ steps.nuget-login-risk.outputs.NUGET_API_KEY }}" -Source 'https://api.nuget.org/v3/index.json'
+          dotnet nuget push ./src/ReleaseOutput/*.nupkg --api-key "${{ steps.nuget-login-risk.outputs.NUGET_API_KEY }}" --source "https://api.nuget.org/v3/index.json"
         fi
 
         # Clean for Thunderstore packaging
