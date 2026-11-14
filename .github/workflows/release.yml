@@ -20,18 +20,15 @@ jobs:
     steps:
 
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
-    - name: Setup NuGet
-      uses: NuGet/setup-nuget@v1
+    - name: Setup dotnet
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
 
     - name: Setup TCLI
       run: dotnet tool install --global tcli
-
-    - name: Setup dotnet
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: 8.0.x
 
     - name: Install Mono on Ubuntu
       run: |
@@ -41,6 +38,12 @@ jobs:
         echo "deb https://download.mono-project.com/repo/ubuntu stable-focal main" | sudo tee /etc/apt/sources.list.d/mono-official-stable.list
         sudo apt-get update
         sudo apt-get install -y mono-complete
+
+    - name: NuGet login
+      uses: NuGet/login@v1
+      id: nuget-login-risk
+      with:
+        user: RiskofThunder
 
     - name: Build and Publish
       run: |
@@ -53,8 +56,7 @@ jobs:
         dotnet pack --configuration Release /p:PackageOutputPath=./ReleaseOutput /p:OutputPath=./ReleaseOutput
 
         if [ "${{ github.event.inputs.skip_nuget }}" != 'true' ]; then
-          nuget setapikey "${{ secrets.NUGET_API_KEY }}"
-          nuget push ./src/ReleaseOutput/*.nupkg -Source 'https://api.nuget.org/v3/index.json'
+          dotnet nuget push ./src/ReleaseOutput/*.nupkg --api-key "${{ steps.nuget-login-risk.outputs.NUGET_API_KEY }}" -Source 'https://api.nuget.org/v3/index.json'
         fi
 
         # Clean for Thunderstore packaging
