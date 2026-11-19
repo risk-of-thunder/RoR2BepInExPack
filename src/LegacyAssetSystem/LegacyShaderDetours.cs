@@ -39,12 +39,20 @@ internal static class LegacyShaderDetours
 
     private static Shader OnShaderFind(string path)
     {
-        var shader = LegacyShaderAPI.Find(path);
+        var shader = _origFind(path);
         if (shader)
         {
             return shader;
         }
 
-        return _origFind(path);
+        try
+        {
+            return LegacyShaderAPI.Find(path);
+        }
+        catch (System.Exception e)
+        {
+            Log.Warning(e.Message);
+            return null;
+        }
     }
 }
