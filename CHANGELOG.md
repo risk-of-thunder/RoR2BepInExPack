@@ -1,3 +1,7 @@
+-   **1.50.1**
+
+    - Fix `LegacyShaderDetours` that could cause `Shader.Find` to throw an exception.
+
 -   **1.50.0**
 
     - Add better logging when a method that crashes on start-up does not appear on the stack trace.
